@@ -1,0 +1,42 @@
+import RPi.GPIO as GPIO
+from adafruit_servokit import ServoKit
+import time
+
+kit = ServoKit(channels=16)
+
+#making the servo rotate
+kit.continuous_servo[6].throttle = 1
+
+# Set the GPIO mode to BCM (Broadcom SOC channel numbering)
+GPIO.setmode(GPIO.BCM)
+
+# Set the pin number connected to the ir obstacle avoidance sensor
+SENSOR_PIN = 18
+
+# Set the GPIO pin as an input
+GPIO.setup(SENSOR_PIN, GPIO.IN)
+
+# Variable to track the ir obstacle avoidance sensor state
+prev_obstacle_state = GPIO.HIGH  # Assuming no obstacle initially
+
+
+def photoelectric_sensor_detects_pill():
+    #This function returns True if photoelectric sensor detects a pill, False otherwise
+    global prev_obstacle_state
+    while True:
+        obstacle_state = GPIO.input(SENSOR_PIN)
+        if obstacle_state != prev_obstacle_state:
+            if obstacle_state == GPIO.LOW:
+                print("An obstacle is detected")
+                kit.continuous_servo[6].throttle = 0
+                return True
+            else:
+                print("An obstacle is removed")
+                return False
+        prev_obstacle_state = obstacle_state
+        #small delay to avoid overloading the sensor
+#         time.sleep(0.05)
+
+photoelectric_sensor_detects_pill()
+
+#   GPIO.cleanup()
