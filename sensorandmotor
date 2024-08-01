@@ -4,17 +4,26 @@ import time
 
 kit = ServoKit(channels=16)
 
-#making the servo rotate
-kit.continuous_servo[6].throttle = 1
-
 # Set the GPIO mode to BCM (Broadcom SOC channel numbering)
 GPIO.setmode(GPIO.BCM)
 
+#motor isn't moving at first
+kit.continuous_servo[6].throttle = 0
+
+
 # Set the pin number connected to the ir obstacle avoidance sensor
+switch_pin = 17
 SENSOR_PIN = 18
+led_pin = 13
+
 
 # Set the GPIO pin as an input
+GPIO.setup(switch_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+
 GPIO.setup(SENSOR_PIN, GPIO.IN)
+GPIO.setup(led_pin, GPIO.OUT)
+
 
 # Variable to track the ir obstacle avoidance sensor state
 prev_obstacle_state = GPIO.HIGH  # Assuming no obstacle initially
@@ -22,21 +31,33 @@ prev_obstacle_state = GPIO.HIGH  # Assuming no obstacle initially
 
 def photoelectric_sensor_detects_pill():
     #This function returns True if photoelectric sensor detects a pill, False otherwise
+    
     global prev_obstacle_state
     while True:
+        
         obstacle_state = GPIO.input(SENSOR_PIN)
         if obstacle_state != prev_obstacle_state:
             if obstacle_state == GPIO.LOW:
                 print("An obstacle is detected")
                 kit.continuous_servo[6].throttle = 0
-                return True
             else:
                 print("An obstacle is removed")
-                return False
-        prev_obstacle_state = obstacle_state
-        #small delay to avoid overloading the sensor
-#         time.sleep(0.05)
+#         prev_obstacle_state = obstacle_state
+     
 
-photoelectric_sensor_detects_pill()
+GPIO.output(led_pin, GPIO.LOW)
 
-#   GPIO.cleanup()
+try:
+    while True:
+        if GPIO.input(switch_pin) == GPIO.HIGH:
+            print("Starting")
+            GPIO.output(led_pin, GPIO.HIGH)
+            time.sleep(3)
+        else:
+            GPIO.output(led_pin, GPIO.LOW)
+            kit.continuous_servo[6].throttle = 1
+            photoelectric_sensor_detects_pill()
+
+finally:
+    GPIO.cleanup()
+
