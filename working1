@@ -1,0 +1,166 @@
+import RPi.GPIO as GPIO
+import time 
+from datetime import datetime 
+from adafruit_servokit import ServoKit
+
+kit = ServoKit(channels=16)
+
+
+# Define the morning_pills and evening_pills lists
+morning_pills = []
+evening_pills = []
+
+# Set up GPIO mode
+GPIO.setmode(GPIO.BCM)  # Use BCM GPIO numbering
+
+class Morning:
+    def __init__(self, Mcontainer: str, Mdosage: int, Mquantity: int):
+        self.Mcontainer = Mcontainer
+        self.Mdosage = Mdosage
+        self.Mquantity = Mquantity
+        self.Mchannel = None  
+
+class Evening:
+    def __init__(self, Econtainer: str, Edosage: int, Equantity: int):
+        self.Econtainer = Econtainer
+        self.Edosage = Edosage
+        self.Equantity = Equantity
+        self.Echannel = None  
+
+# Example of adding a Morning and Evening pill object to the list
+morning_pills.append(Morning(Mcontainer="blue", Mdosage=1, Mquantity=40))
+evening_pills.append(Evening(Econtainer="red", Edosage=1, Equantity=30))
+
+# Afternoon preprogrammed time (3:00:00 PM)
+evening_time_hour = 14
+evening_time_minute = 31
+evening_time_second = 0
+
+# Morning preprogrammed time (9:30:00 AM)
+morning_time_hour = 9
+morning_time_minute = 30
+morning_time_second = 0
+
+# Simulated switch pin
+switch_pin = 17
+
+# Simulated photo sensor pin
+PHOTOSENSOR_PIN = 18
+
+# Simulated buzzer and LED pins
+buzzer_pin = 4
+led_pin = 13
+
+# Initialize pins
+GPIO.setup(switch_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(PHOTOSENSOR_PIN, GPIO.IN)
+GPIO.setup(buzzer_pin, GPIO.OUT)
+GPIO.setup(led_pin, GPIO.OUT)
+
+# Loop through morning_pills and assign GPIO pins based on container color
+for i in range(len(morning_pills)):
+    if morning_pills[i].Mcontainer == "blue":
+        morning_pills[i].Mchannel = kit.servo[0]
+    elif morning_pills[i].Mcontainer == "red":
+        morning_pills[i].Mchannel = kit.servo[2]
+    elif morning_pills[i].Mcontainer == "green":
+        morning_pills[i].Mchannel = kit.servo[4]
+    elif morning_pills[i].Mcontainer == "yellow":
+        morning_pills[i].Mchannel = kit.servo[6]
+
+for i in range(len(evening_pills)):
+    if evening_pills[i].Econtainer == "blue":
+        evening_pills[i].Echannel = kit.servo[0]
+    elif evening_pills[i].Econtainer == "red":
+        evening_pills[i].Echannel = kit.servo[2]
+    elif evening_pills[i].Econtainer == "green":
+        evening_pills[i].Echannel = kit.servo[4]
+    elif evening_pills[i].Econtainer == "yellow":
+        evening_pills[i].Echannel = kit.servo[6]
+
+# Print out the results to verify
+for pill in morning_pills:
+    print(f"Container: {pill.Mcontainer}, GPIO Pin: {pill.Mchannel}")
+for pill in evening_pills:
+    print(f"Container: {pill.Econtainer}, GPIO Pin: {pill.Echannel}")
+
+
+
+def move_servo(container, degrees):
+    #This function should move the servo to the specified degrees
+    kit.servo[container].angle = degrees
+
+#variable to track the obstacle to sensor state
+prev_obstacle_state = GPIO.HIGH
+
+def photoelectric_sensor_detects_pill():
+    #This function should return True if the photoelectric sensor detects a pill, False otherwise
+    global prev_obstacle_state
+    while True:
+        obstacle_state = GPIO.input(PHOTOSENSOR_PIN)
+        if obstacle_state != prev_obstacle_state:
+            if obstacle_state == GPIO.LOW:
+                print("An obstacle is detected")
+                return True
+            else:
+                print("An obstacle is removed")
+                return False
+        prev_obstacle_state = obstacle_state
+        #small delay to avoid overloading the sensor
+        time.sleep(0.05)
+
+# def is_preprogrammed_time(hour, minute, second):
+#     now = datetime.now()
+#     return now.hour == hour and now.minute == minute and now.second == second
+
+
+try:
+    while True:
+        # Check if it's the afternoon preprogrammed time
+        GPIO.output(buzzer_pin, GPIO.LOW)
+        GPIO.output(led_pin, GPIO.LOW)
+        if GPIO.input(switch_pin) == GPIO.HIGH:
+            #GPIO.output(buzzer_pin, GPIO.HIGH)
+            set_alarm(5)
+            print("finished")
+            time.sleep(5)
+            
+            GPIO.output(led_pin, GPIO.LOW)
+        # Check if it's the morning preprogrammed time
+#         elif is_preprogrammed_time(morning_time_hour, morning_time_minute, morning_time_second) and GPIO.input(switch_pin) == GPIO.HIGH:
+#             GPIO.output(buzzer_pin, GPIO.HIGH)
+#             GPIO.output(led_pin, GPIO.HIGH)
+
+        # Check if switch is turned on
+        if GPIO.input(switch_pin) == GPIO.LOW:  # Assuming active-low switch
+            GPIO.output(buzzer_pin, GPIO.LOW)
+            GPIO.output(led_pin, GPIO.LOW)
+
+#             if is_preprogrammed_time(evening_time_hour, evening_time_minute, evening_time_second):
+#                 for pill in evening_pills:
+#                     for _ in range(pill.Edosage):
+#                         if not photoelectric_sensor_detects_pill():
+#                             move_servo(pill.Echannel, 180)
+#                             print('Dispensing')
+#                         else:
+#                             move_servo(pill.Egpio, 0)
+#                             pill.Equantity -= pill.Edosage
+#                             print(pill.Equantity)
+
+#             if is_preprogrammed_time(morning_time_hour, morning_time_minute, morning_time_second):
+#                 for pill in morning_pills:
+#                     for _ in range(pill.Mdosage):
+#                         if not photoelectric_sensor_detects_pill():
+#                             move_servo(pill.Mchannel, 180)
+#                             print('Dispensing')
+#                         else:
+#                             move_servo(pill.Mgpio, 0)
+#                             pill.Mquantity -= pill.Mdosage
+#                             print(pill.Mquantity)
+
+        time.sleep(0.05)
+
+finally:
+    GPIO.output(buzzer_pin, GPIO.LOW)
+    GPIO.output(led_pin, GPIO.LOW)
+    GPIO.cleanup()
