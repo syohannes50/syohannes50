@@ -1,3 +1,4 @@
+# this code is a working file that runs one sensor and motor the way we want it to in the actual device
 import RPi.GPIO as GPIO
 from adafruit_servokit import ServoKit
 import time
