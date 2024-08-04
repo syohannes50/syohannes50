@@ -350,4 +350,3 @@ class ScannerViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         }
     }
 }
-
