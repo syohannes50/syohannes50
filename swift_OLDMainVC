@@ -1,0 +1,26 @@
+import UIKit
+
+class ViewController: UIViewController {
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+    }
+    
+    @IBAction func scanButtonTapped() {
+        performSegue(withIdentifier: "showScanner", sender: nil)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "showScanner" {
+            if let scannerVC = segue.destination as? ScannerViewController {
+                scannerVC.delegate = self
+            }
+        }
+    }
+}
+
+extension ViewController: ScannerViewControllerDelegate {
+    func scanComplete(withText recognizedText: String) {
+        print("Recognized Text: \(recognizedText)")
+    }
+}
