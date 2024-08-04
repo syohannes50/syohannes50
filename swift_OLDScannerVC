@@ -1,0 +1,353 @@
+import UIKit
+import AVFoundation
+import Vision
+import Foundation
+
+// Protocol to notify delegate when scan is complete
+protocol ScannerViewControllerDelegate: AnyObject {
+    func scanComplete(withText recognizedText: String)
+}
+
+class ScannerViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
+
+    // Variables for camera capture session and preview layer
+    var captureSession: AVCaptureSession!
+    var previewLayer: AVCaptureVideoPreviewLayer!
+    var recognizedTextSet = Set<String>() // Set to store recognized text
+    var scanRegion: CGRect! // Rectangle defining the scanning region
+    var scanOverlay: UIView! // UIView to show scanning region overlay
+    weak var delegate: ScannerViewControllerDelegate? // Delegate to notify when scan is complete
+    
+    var isScanning: Bool = true // Flag to indicate if scanning is in progress
+    var recognizedTextFrames = [String]() // List to store recognized text from multiple frames
+    
+    // GLOBAL DATA VARIABLES
+    var gdescription: String = ""
+    var gquantity: Int = 0
+    var gdosage: Int = 0
+    var gfrequencyString: String = ""
+    
+    // ARRAY FOR LIST OF COLORS OF CONTAINERS
+    let listOfColors: [String] = ["red", "blue", "black", "grey"]
+    var colorIndex = 0 // Index to track the current color in the list
+    
+    
+    // Structures for morning and evening medications
+    struct Morning {
+        //set morning time
+        var Mcontainer: String
+        var Mdosage: Int
+        var Mquantity: Int
+    }
+
+    struct Evening {
+        //set evening time
+        var Econtainer: String
+        var Edosage: Int
+        var Equantity: Int
+    }
+
+    // Arrays to hold Morning and Evening pill objects
+    var morningPills: [Morning] = []
+    var eveningPills: [Evening] = []
+    
+    var medCount = 0
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        // Setup camera and scan region overlay
+        DispatchQueue.global(qos: .userInitiated).async {
+            self.setupCamera()
+            DispatchQueue.main.async {
+                self.setupScanRegionOverlay()
+                self.startScanning()
+            }
+        }
+
+        print("View Loaded")
+    }
+
+    // Function to setup camera for capturing video
+    func setupCamera() {
+        captureSession = AVCaptureSession()
+        guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else { return }
+        let videoInput: AVCaptureDeviceInput
+
+        do {
+            videoInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
+        } catch {
+            print("Error setting up camera input: \(error)")
+            return
+        }
+
+        if captureSession.canAddInput(videoInput) {
+            captureSession.addInput(videoInput)
+        } else {
+            print("Cannot add video input to capture session")
+            return
+        }
+
+        let videoOutput = AVCaptureVideoDataOutput()
+        videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "videoQueue"))
+
+        if captureSession.canAddOutput(videoOutput) {
+            captureSession.addOutput(videoOutput)
+        } else {
+            print("Cannot add video output to capture session")
+            return
+        }
+
+        DispatchQueue.main.async {
+            self.previewLayer = AVCaptureVideoPreviewLayer(session: self.captureSession)
+            self.previewLayer.frame = self.view.layer.bounds
+            self.previewLayer.videoGravity = .resizeAspectFill
+            self.view.layer.addSublayer(self.previewLayer)
+
+            DispatchQueue.global(qos: .background).async {
+                self.captureSession.startRunning()
+            }
+        }
+    }
+
+    // Function to setup scan region overlay
+    func setupScanRegionOverlay() {
+        self.view.layoutIfNeeded()
+
+        // Define scan region as a flexible rectangle to capture text on round surfaces
+        let x: CGFloat = 0.05
+        let y: CGFloat = 0.3
+        let width: CGFloat = 0.9
+        let height: CGFloat = 0.4
+
+        let scanRegionWidth = self.view.bounds.width * width
+        let scanRegionHeight = self.view.bounds.height * height
+        let scanRegionX = self.view.bounds.width * x
+        let scanRegionY = self.view.bounds.height * y
+
+        self.scanRegion = CGRect(x: scanRegionX, y: scanRegionY, width: scanRegionWidth, height: scanRegionHeight)
+
+        // Create and add the overlay to the view
+        self.scanOverlay = UIView(frame: self.scanRegion)
+        self.scanOverlay.layer.borderColor = UIColor.green.cgColor
+        self.scanOverlay.layer.borderWidth = 2
+        self.scanOverlay.backgroundColor = UIColor.clear
+        self.view.addSubview(self.scanOverlay)
+    }
+
+    // Function to start scanning process
+    func startScanning() {
+        isScanning = true
+        recognizedTextSet.removeAll() // Clear previous results
+        recognizedTextFrames.removeAll() // Clear previous frame results
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
+            self?.stopCaptureSession()
+        }
+    }
+
+    // Function to show a popup with the scan result
+    func showScanResultPopup() {
+        let aggregatedRecognizedText = recognizedTextFrames.joined(separator: "\n")
+        let extractedInfo = extractMedicationInfo(from: aggregatedRecognizedText)
+        let alertController = UIAlertController(title: "Scanning is finished", message: "Recognized Text:\n\(extractedInfo)", preferredStyle: .alert)
+        
+        // Confirm action to notify delegate and dismiss view
+        alertController.addAction(UIAlertAction(title: "Confirm", style: .default, handler: { _ in
+            self.delegate?.scanComplete(withText: extractedInfo)
+            self.processMedicationInfo()
+            self.dismiss(animated: true, completion: nil)
+            //switch to ColorView Controller
+        }))
+        
+        // Redo action to restart scanning
+        alertController.addAction(UIAlertAction(title: "Redo", style: .default, handler: { _ in
+            self.startCaptureSession()
+            self.startScanning()
+        }))
+        
+        present(alertController, animated: true, completion: nil)
+    }
+
+    // Function to process medication information and instantiate appropriate structures
+    func processMedicationInfo() {
+            // Increment medication count
+            medCount += 1
+
+            // Determine the color index for the new pill
+            //FIX!!!!!!!
+            let currentColor = listOfColors[colorIndex]
+            colorIndex = (colorIndex + 1) % listOfColors.count
+
+            // Determine if it's a morning or evening medication and instantiate the appropriate structure
+            if gfrequencyString.lowercased() == "daily" {
+                if gdescription.lowercased() == "before breakfast" {
+                    // Instantiate new Morning medicine
+                    let Mpill = Morning(Mcontainer: currentColor, Mdosage: gdosage, Mquantity: gquantity)
+                    morningPills.append(Mpill)
+                    print("New Morning Pill Added:")
+                    print("Container: \(Mpill.Mcontainer), Dosage: \(Mpill.Mdosage), Quantity: \(Mpill.Mquantity)")
+                } else {
+                    // Instantiate new Evening medicine
+                    let Epill = Evening(Econtainer: currentColor, Edosage: gdosage, Equantity: gquantity)
+                    eveningPills.append(Epill)
+                    print("New Evening Pill Added:")
+                    print("Container: \(Epill.Econtainer), Dosage: \(Epill.Edosage), Quantity: \(Epill.Equantity)")
+                }
+            } else {
+                // Instantiate new Morning medicine
+                let Mpill = Morning(Mcontainer: currentColor, Mdosage: gdosage, Mquantity: gquantity)
+                morningPills.append(Mpill)
+                print("New Morning Pill Added:")
+                print("Container: \(Mpill.Mcontainer), Dosage: \(Mpill.Mdosage), Quantity: \(Mpill.Mquantity)")
+                
+                // Instantiate new Evening medicine
+                let Epill = Evening(Econtainer: currentColor, Edosage: gdosage, Equantity: gquantity)
+                eveningPills.append(Epill)
+                print("New Evening Pill Added:")
+                print("Container: \(Epill.Econtainer), Dosage: \(Epill.Edosage), Quantity: \(Epill.Equantity)")
+            }
+        }
+    
+    // Function to start the capture session
+    func startCaptureSession() {
+        DispatchQueue.global(qos: .background).async {
+            self.captureSession.startRunning()
+        }
+    }
+
+    // Function to stop the capture session
+    func stopCaptureSession() {
+        DispatchQueue.global(qos: .background).async {
+            self.captureSession.stopRunning()
+            DispatchQueue.main.async {
+                self.isScanning = false
+                self.showScanResultPopup()
+            }
+        }
+    }
+
+    // Function to extract medication information from text using regex
+    func extractMedicationInfo(from text: String) -> String {
+        var medicationInfo = ""
+        
+        // Extract dosage
+        let dosagePattern = "\\b(one|two|\\d+)\\s*(?:tablets?|capsules?)\\b"
+        if let regex = try? NSRegularExpression(pattern: dosagePattern, options: .caseInsensitive) {
+            let matches = regex.matches(in: text, options: [], range: NSRange(location: 0, length: text.utf16.count))
+            if let match = matches.first, let range = Range(match.range, in: text) {
+                let matchedString = String(text[range])
+                let dosageString = matchedString.replacingOccurrences(of: "one", with: "1")
+                                                 .replacingOccurrences(of: "two", with: "2")
+                                                 .components(separatedBy: CharacterSet.decimalDigits.inverted).joined()
+                
+                if let dosage = Int(dosageString) {
+                    medicationInfo += "Dosage: \(dosage)\n"
+                    gdosage = dosage
+                }
+            }
+        }
+
+        // Extract frequency
+        let frequencyPattern = "\\b(daily|twice)\\b"//add "every day" or "once"
+        if let regex = try? NSRegularExpression(pattern: frequencyPattern, options: .caseInsensitive) {
+            let matches = regex.matches(in: text, options: [], range: NSRange(location: 0, length: text.utf16.count))
+            if let match = matches.first, let range = Range(match.range, in: text) {
+                let matchedString = String(text[range])
+                medicationInfo += "Frequency: \(matchedString)\n"
+                gfrequencyString = matchedString
+            }
+        }
+
+        // Extract instructions
+        let instructionPattern = "(before\\s+breakfast|after\\s+(?:meal|dinner|lunch)|with\\s+food|without\\s+food)"
+        if let regex = try? NSRegularExpression(pattern: instructionPattern, options: .caseInsensitive) {
+            let matches = regex.matches(in: text, options: [], range: NSRange(location: 0, length: text.utf16.count))
+            if let match = matches.first, let range = Range(match.range, in: text) {
+                let matchedString = String(text[range])
+                medicationInfo += "Instructions: \(matchedString)\n"
+                gdescription = matchedString
+            }
+        }
+
+        // Extract quantity
+        let quantityPattern = "\\b(?:qty|quantity)[:\\s]*(\\d+)\\b"
+        if let regex = try? NSRegularExpression(pattern: quantityPattern, options: .caseInsensitive) {
+            let matches = regex.matches(in: text, options: [], range: NSRange(location: 0, length: text.utf16.count))
+            if let match = matches.first, let range = Range(match.range, in: text) {
+                let matchedString = String(text[range])
+                let quantityString = matchedString.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()
+                
+                if let quantity = Int(quantityString) {
+                    medicationInfo += "Quantity: \(quantity)\n"
+                    gquantity = quantity
+                }
+            }
+        }
+
+        if medicationInfo.isEmpty {
+            return "No medication information found"
+        }
+        
+        print("Medication Info: \(medicationInfo)")
+        print("Frequency String: \(gfrequencyString)")
+        print("Dosage: \(gdosage)")
+        print("Description: \(gdescription)")
+        print("Quantity: \(gquantity)")
+        
+        return medicationInfo
+    }
+
+    // Delegate method to process each video frame
+    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer), isScanning else { return }
+
+        // Request to recognize text in the frame
+        let request = VNRecognizeTextRequest { [weak self] (request, error) in
+            guard let self = self else { return }
+            if let error = error {
+                print("Error during text recognition: \(error)")
+                return
+            }
+
+            guard let observations = request.results as? [VNRecognizedTextObservation] else {
+                print("No text observations found")
+                return
+            }
+
+            // Process each text observation
+            for observation in observations {
+                if let bestCandidate = observation.topCandidates(1).first {
+                    let boundingBox = observation.boundingBox
+
+                    // Convert rect to view's coordinate system
+                    let convertedRect = self.previewLayer.layerRectConverted(fromMetadataOutputRect: boundingBox)
+
+                    // Check if text is within the scan region
+                    if self.scanRegion.contains(convertedRect) {
+                        self.recognizedTextSet.insert(bestCandidate.string)
+                        self.recognizedTextFrames.append(bestCandidate.string)
+                    } else {
+                        print("Text not within scan region")
+                        print("Bounding Box: \(boundingBox)")
+                        print("Converted Rect: \(convertedRect)")
+                        print("Scan Region: \(self.scanRegion!)")
+                    }
+                } else {
+                    print("No best candidate found for observation")
+                }
+            }
+        }
+        
+        request.recognitionLevel = .accurate
+        request.usesLanguageCorrection = true
+
+        // Perform the text recognition request
+        let requestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
+        do {
+            try requestHandler.perform([request])
+        } catch {
+            print("Error performing text recognition request: \(error)")
+        }
+    }
+}
+
