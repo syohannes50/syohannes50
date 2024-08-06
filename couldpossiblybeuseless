@@ -17,7 +17,7 @@ class Evening:
 
 # Adding a evening pill object to the list
 evening_pills.append(Evening(Econtainer="yellow", Edosage=1, Equantity=0, Edescription="with food"))
-evening_pills.append(Evening(Econtainer="green", Edosage=1, Equantity=0, Edescription="without food"))
+evening_pills.append(Evening(Econtainer="green", Edosage=2, Equantity=0, Edescription="without food"))
 
 
 for i in range(len(evening_pills)):
@@ -68,8 +68,8 @@ GPIO.setup(SENSOR_PIN2, GPIO.IN)
 # Variable to track the obstacle avoidance sensor state
 prev_obstacle_state = GPIO.HIGH  # Assuming no obstacle initially
 
-def printHello():
-    print("hello")
+def printReady():
+    print("ready")
 
 def photoelectric_sensor_detects_pill():
     
@@ -87,6 +87,7 @@ def photoelectric_sensor_detects_pill():
                 return True
             else:
                 print("An obstacle is removed")
+                
 
 Buzz = GPIO.PWM(Buzzer, 1000)
 
@@ -106,11 +107,16 @@ try:
             # once the switch is off, run loop to dispense all the evening pills
             for i in range(len(evening_pills)):
                 print(evening_pills[i].Econtainer)
-                evening_pills[i].Echannel.throttle = 0.1
-                time.sleep(3)
-                printHello()
-                photoelectric_sensor_detects_pill()
-                print("restarting loop")
+                for j in range(evening_pills[i].Edosage):
+                    print(str(evening_pills[i].Edosage) + " pills dispensing")
+                    evening_pills[i].Echannel.throttle = 0.2
+                    time.sleep(3)
+                    printReady()
+                    photoelectric_sensor_detects_pill()
+                    print("restarting loop")
+
+
+
 
 finally:
     GPIO.cleanup()
