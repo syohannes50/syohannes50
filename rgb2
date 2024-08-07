@@ -13,10 +13,7 @@ def setup(Rpin):
 	for i in pins:
 		GPIO.setup(pins[i], GPIO.OUT)   # Set pins' mode is output
 		GPIO.output(pins[i], GPIO.HIGH) # Set pins to high(+3.3V) to off led
-	
 	p_R = GPIO.PWM(pins['pin_R'], 2000)  # set Frequece to 2KHz
-
-	
 	p_R.start(100)      # Initial duty Cycle = 0(leds off)
 
 
@@ -31,12 +28,7 @@ def off():
 
 def setColor(col):   # For example : col = 0x112233
 	R_val = (col & 0xff0000) >> 16
-
-
-
 	R_val = map(R_val, 0, 255, 0, 100)
-
-	
 	p_R.ChangeDutyCycle(100-R_val)     # Change duty cycle
 
 
@@ -57,6 +49,5 @@ if __name__ == "__main__":
 	try:
 		setup(R)
 		loop(1)
-# 		loop(2)
 	except KeyboardInterrupt:
 		destroy()
