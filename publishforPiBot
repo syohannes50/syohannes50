@@ -1,0 +1,84 @@
+import UIKit
+import CocoaMQTT
+
+class ViewController: UIViewController, CocoaMQTTDelegate {
+
+
+    let mqttClient = CocoaMQTT(clientID: "PiBotApp", host: "mqtt.things.ph", port: 1883)
+    var hello = "hello"
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        mqttClient.delegate = self
+        mqttClient.keepAlive = 60
+        mqttClient.cleanSession = true
+        mqttClient.autoReconnect = true
+    }
+    
+    @IBAction func sendMessage(_ sender: UIButton) {
+        print("Sending message:")
+        mqttClient.publish("pibot", withString: hello, qos: .qos1)
+    }
+    
+    @IBAction func connect(_ sender: UIButton) {
+        mqttClient.connect()
+    }
+    
+    @IBAction func disconnect(_ sender: UIButton) {
+        mqttClient.disconnect()
+    }
+    
+    // CocoaMQTTDelegate methods
+    
+    
+    func mqtt(_ mqtt: CocoaMQTT, didPublishMessage message: CocoaMQTTMessage, id: UInt16) {
+        print("yay")
+    }
+    
+    func mqtt(_ mqtt: CocoaMQTT, didPublishAck id: UInt16) {
+        print("did publish")
+    }
+    
+    func mqtt(_ mqtt: CocoaMQTT, didReceiveMessage message: CocoaMQTTMessage, id: UInt16) {
+        print("Received message: \(message.string ?? "") on topic: \(message.topic)")
+    }
+    
+    func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: (any Error)?) {
+        print("disconnected")
+    }
+    
+    func mqtt(_ mqtt: CocoaMQTT, didConnectAck ack: CocoaMQTTConnAck) {
+        print("Connected with ack: \(ack)")
+        if ack == .accept {
+            // Subscribe to topic
+            mqtt.subscribe("pibot/response")
+        }
+    }
+
+    func mqtt(_ mqtt: CocoaMQTT, didStateChangeTo state: CocoaMQTTConnState) {
+        print("Connection state changed to: \(state)")
+    }
+    
+    func mqtt(_ mqtt: CocoaMQTT, didDisconnectWithError err: Error?) {
+        print("Disconnected with error: \(String(describing: err))")
+    }
+    
+
+    func mqtt(_ mqtt: CocoaMQTT, didSubscribeTopics success: NSDictionary, failed: [String]) {
+        print("Subscribed to topics: \(success), failed topics: \(failed)")
+    }
+
+    func mqtt(_ mqtt: CocoaMQTT, didUnsubscribeTopics topics: [String]) {
+        print("Unsubscribed from topics: \(topics)")
+    }
+    
+    func mqttDidPing(_ mqtt: CocoaMQTT) {
+        print("MQTT did ping")
+    }
+    
+    func mqttDidReceivePong(_ mqtt: CocoaMQTT) {
+        print("MQTT did receive pong")
+    }
+     
+     
+}
