@@ -10,6 +10,8 @@ class ViewController: UIViewController, CocoaMQTTDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         mqttClient.delegate = self
+        mqttClient.username = "66b49ce0c762db171066c05a"
+        mqttClient.password = "A1Zhqr0MKXUz7GXdCRAx5FVD"
         mqttClient.keepAlive = 60
         mqttClient.cleanSession = true
         mqttClient.autoReconnect = true
