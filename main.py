@@ -1,9 +1,68 @@
+import random
+from paho.mqtt import client as mqtt_client
+import json
 import RPi.GPIO as GPIO
 from adafruit_servokit import ServoKit
 import time
 
+description = None
+dosage = None
+frequency = None
+name = None
+quantity = None
+
+broker = 'mqtt.things.ph' #INPUT BROKER NAME
+port = 1883
+topic = "pibot" #INPUT TOPIC NAME
+
+# Generate a Client ID with the publish prefix.
+client_id = f'publish-{random.randint(0, 1000)}'
+
+username = '66b49ce0c762db171066c05a' #INPUT USERNAME
+password = '' #INPUT PASSWORD
 
 
+def connect_mqtt() -> mqtt_client:
+    def on_connect(client, userdata, flags, rc):
+        if rc == 0:
+            print("Connected to MQTT Broker!")
+        else:
+            print("Failed to connect, return code %d\n", rc)
+
+    client = mqtt_client.Client(client_id)
+    client.username_pw_set(username, password)
+    client.on_connect = on_connect
+    client.connect(broker, port) // currently don't want to use user/pass
+    return client
+
+
+#Prints the recieved message
+def subscribe(client: mqtt_client):
+    def on_message(client, userdata, msg):
+        global description, dosage, frequency, quantity, name
+        print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
+    try:
+        # Decode the incoming JSON data
+        data = json.loads(msg.payload.decode())
+        
+        # Store the received data in the corresponding variables
+        description = data.get("description")
+        dosage = data.get("dosage")
+        quantity = data.get("quantity")
+        name = data.get("name")
+        frequency = data.get("frequency")
+        
+        
+    except:
+        print("Error: Failed to decode JSON")
+        
+            
+    client.subscribe(topic)
+    client.on_message = on_message
+
+
+
+#------------------------------------------- HANDLES THE EVENING PILLS LIST AND MOTOR ASSIGNMENT
     # Define the evening_pills list
 evening_pills = []
 
@@ -115,7 +174,11 @@ Buzz = GPIO.PWM(Buzzer, 1000)
 GPIO.output(led_pin, GPIO.LOW)
 
 try:
-        
+        #THIS IS THE FIRST THING THAT SHOULD RUN ALWAYS. PRESCRIPTION TRANSFER BEFORE DISPENSING
+        client = connect_mqtt()
+        subscribe(client)
+        client.loop_forever()
+
         if GPIO.input(switch_pin) == GPIO.HIGH:
             print("Ready to Dispense!")
             Buzz.start(20)
