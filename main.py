@@ -5,6 +5,8 @@ import RPi.GPIO as GPIO
 from adafruit_servokit import ServoKit
 import time
 
+scanCount = 0
+
 description = None
 dosage = None
 frequency = None
@@ -39,8 +41,9 @@ def connect_mqtt() -> mqtt_client:
 #Prints the recieved message
 def subscribe(client: mqtt_client):
     def on_message(client, userdata, msg):
-        global description, dosage, frequency, quantity, name
+        global description, dosage, frequency, quantity, name, scanCount
         print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
+        scanCount += 1
     try:
         # Decode the incoming JSON data
         data = json.loads(msg.payload.decode())
@@ -75,7 +78,6 @@ class Evening:
         self.Echannel = None
         self.Edescription = Edescription
 
-  
 def process_med_info(name, current_color, description, dosage, quantity, frequency, evening_pills): #remove evening_pills as a parameter
 if frequency.lower() == "daily":
     if _description.lower() == "with food":
@@ -178,6 +180,14 @@ try:
         client = connect_mqtt()
         subscribe(client)
         client.loop_forever()
+
+        if scanCount < 3:
+            process_med_info()
+        else:
+            evening_pills.clear()
+            scanCount = 0
+            
+            
 
         if GPIO.input(switch_pin) == GPIO.HIGH:
             print("Ready to Dispense!")
