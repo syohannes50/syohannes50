@@ -5,12 +5,9 @@ import RPi.GPIO as GPIO
 from adafruit_servokit import ServoKit
 import time
 
-
-
 ''' 
 
 kit.continuous_servo[0].throttle = 0
-
 
 # Function to spin the servo for a specific amount of time
 def shake_servo(channel, duration):
@@ -155,8 +152,8 @@ kit = ServoKit(channels=16)
 GPIO.setmode(GPIO.BCM)
 
 #motor isn't moving at first
-# kit.continuous_servo[0].throttle = 0
-# kit.continuous_servo[2].throttle = 0
+kit.continuous_servo[0].throttle = 0
+kit.continuous_servo[2].throttle = 0
 kit.continuous_servo[4].throttle = 0
 kit.continuous_servo[6].throttle = 0
 
@@ -184,9 +181,6 @@ GPIO.setup(SENSOR_PIN2, GPIO.IN)
 # Variable to track the obstacle avoidance sensor state
 prev_obstacle_state = GPIO.HIGH  # Assuming no obstacle initially
 
-def printReady():
-    print("ready")
-
 def photoelectric_sensor_detects_pill():
     
     global prev_obstacle_state
@@ -206,7 +200,6 @@ def photoelectric_sensor_detects_pill():
                 
 
 Buzz = GPIO.PWM(Buzzer, 1000)
-
 GPIO.output(led_pin, GPIO.LOW)
 
 try:
@@ -221,17 +214,21 @@ try:
         else:
             evening_pills.clear()
             scanCount = 0
-            
+
+        #GUI IS STREAK SCREEN
+    
         #two minute timer until the dispensing starts
         time.sleep(120)
-            
 
-        if GPIO.input(switch_pin) == GPIO.HIGH:
-            print("Ready to Dispense!")
-            Buzz.start(20)
-            GPIO.output(led_pin, GPIO.HIGH)
-            time.sleep(5)
-        if GPIO.input(switch_pin) == GPIO.LOW:
+        #GUI SWITCHES TO READY TO DISPENSE SCREEN AND ALARMS ARE ON FOR FIVE SECONDS
+        print("Ready to Dispense!")
+        GPIO.output(led_pin, GPIO.HIGH)
+        Buzz.start(20)
+        time.sleep(5)
+
+        
+
+        #if BUTTON IS CLICKED ON GUI:
             GPIO.output(led_pin, GPIO.LOW)
             Buzz.stop() 
             
@@ -239,15 +236,14 @@ try:
             for i in range(len(evening_pills)):
                 print(evening_pills[i].Econtainer)
                 for j in range(evening_pills[i].Edosage):
+                    #GUI SWITCHES TO DISPENSING SCREEN
                     print(str(evening_pills[i].Edosage) + " pills dispensing")
-                    evening_pills[i].Echannel.throttle = 0.2
-                    time.sleep(3)
-                    printReady()
-                    photoelectric_sensor_detects_pill()
+                    #evening_pills[i].Echannel.throttle = 0.2 // ACTUALLY SUPPOSED TO CALL A FUNCTION THAT SHAKES AND CHECKS THROUGH SENSORS AT THE SAME TIME
+                    #photoelectric_sensor_detects_pill()
+                    #call function that displays the alert for the pill (with parameters)
                     print("restarting loop")
-
-
-
+                    time.sleep(2)
+            #switch back to default screen or screen that says take your pills. maybe motion sensor code????
 
 finally:
     GPIO.cleanup()
