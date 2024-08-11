@@ -2,7 +2,7 @@ import RPi.GPIO as GPIO
 from adafruit_servokit import ServoKit
 import time
 
-kit = ServoKit(channels=16)
+
 
     # Define the evening_pills list
 evening_pills = []
@@ -51,7 +51,10 @@ for i in range(len(evening_pills)):
         
 for pill in evening_pills:
     print(f"Container: {pill.Econtainer}, GPIO Pin: {pill.Echannel}")
-    
+
+#--------------------------------------------- CODE TO RUN THE DISPENSER
+
+kit = ServoKit(channels=16)
 
 # Set the GPIO mode to BCM (Broadcom SOC channel numbering)
 GPIO.setmode(GPIO.BCM)
@@ -70,8 +73,8 @@ Buzzer = 12
 # all four sensors and the pins
 SENSOR_PIN1 = 18
 SENSOR_PIN2 = 21
-# SENSOR_PIN3 = 
-# SENSOR_PIN4 = 
+SENSOR_PIN3 = 
+SENSOR_PIN4 = 
 
 global Buzz 
 
