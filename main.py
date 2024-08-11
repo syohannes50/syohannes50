@@ -5,6 +5,40 @@ import RPi.GPIO as GPIO
 from adafruit_servokit import ServoKit
 import time
 
+
+
+''' 
+
+kit.continuous_servo[0].throttle = 0
+
+
+# Function to spin the servo for a specific amount of time
+def shake_servo(channel, duration):
+    # Set the servo to the desired throttle (-1 to 1)
+    kit.continuous_servo[channel].throttle = 1
+    
+    # Wait for the specified duration
+    time.sleep(duration)
+    
+    # Stop the servo
+    kit.continuous_servo[channel].throttle = -1
+    time.sleep(duration)
+    kit.continuous_servo[channel].throttle = 1
+    time.sleep(duration)
+    kit.continuous_servo[channel].throttle = -1
+    time.sleep(duration)
+    
+
+# Spin the servo on the specified channel for 3 seconds at full speed forward
+# shake_servo(servo_channel, 0.25)
+
+'''
+
+
+
+
+
+
 scanCount = 0
 
 description = None
@@ -180,6 +214,7 @@ try:
         client = connect_mqtt()
         subscribe(client)
         client.loop_forever()
+        
 
         if scanCount < 3:
             process_med_info()
@@ -187,6 +222,8 @@ try:
             evening_pills.clear()
             scanCount = 0
             
+        #two minute timer until the dispensing starts
+        time.sleep(120)
             
 
         if GPIO.input(switch_pin) == GPIO.HIGH:
