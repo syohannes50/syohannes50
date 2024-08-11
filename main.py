@@ -76,20 +76,20 @@ class Evening:
         self.Edescription = Edescription
 
   
-    def process_med_info(name, current_color, description, dosage, quantity, frequency, evening_pills): #remove evening_pills as a parameter
-    if frequency.lower() == "daily":
-        if _description.lower() == "with food":
-            # Instantiate new Evening medicine
-            pill = Evening(Ename=name, Econtainer=current_color, Edescription=description, Edosage=dosage, Equantity=quantity)
-            evening_pills.append(epill)
-            print("New Evening Pill Added:")
-            print(f"Name: {pill.Ename}, Container: {pill.Econtainer}, Description: {pill.Edescription}, Dosage: {pill.Edosage}, Quantity: {pill.Equantity}")
-    else:
+def process_med_info(name, current_color, description, dosage, quantity, frequency, evening_pills): #remove evening_pills as a parameter
+if frequency.lower() == "daily":
+    if _description.lower() == "with food":
         # Instantiate new Evening medicine
         pill = Evening(Ename=name, Econtainer=current_color, Edescription=description, Edosage=dosage, Equantity=quantity)
-        evening_pills.append(pill)
+        evening_pills.append(epill)
         print("New Evening Pill Added:")
         print(f"Name: {pill.Ename}, Container: {pill.Econtainer}, Description: {pill.Edescription}, Dosage: {pill.Edosage}, Quantity: {pill.Equantity}")
+else:
+    # Instantiate new Evening medicine
+    pill = Evening(Ename=name, Econtainer=current_color, Edescription=description, Edosage=dosage, Equantity=quantity)
+    evening_pills.append(pill)
+    print("New Evening Pill Added:")
+    print(f"Name: {pill.Ename}, Container: {pill.Econtainer}, Description: {pill.Edescription}, Dosage: {pill.Edosage}, Quantity: {pill.Equantity}")
 
 
 # Adding a evening pill object to the list
