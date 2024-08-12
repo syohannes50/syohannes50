@@ -21,7 +21,7 @@ topic = "pibot" #INPUT TOPIC NAME
 client_id = f'publish-{random.randint(0, 1000)}'
 
 username = '66b49ce0c762db171066c05a' #INPUT USERNAME
-password = '' #INPUT PASSWORD
+password = 'A1Zhqr0MKXUz7GXdCRAx5FVD' #INPUT PASSWORD
 
 
 def connect_mqtt() -> mqtt_client:
