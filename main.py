@@ -5,37 +5,6 @@ import RPi.GPIO as GPIO
 from adafruit_servokit import ServoKit
 import time
 
-''' 
-
-kit.continuous_servo[0].throttle = 0
-
-# Function to spin the servo for a specific amount of time
-def shake_servo(channel, duration):
-    # Set the servo to the desired throttle (-1 to 1)
-    kit.continuous_servo[channel].throttle = 1
-    
-    # Wait for the specified duration
-    time.sleep(duration)
-    
-    # Stop the servo
-    kit.continuous_servo[channel].throttle = -1
-    time.sleep(duration)
-    kit.continuous_servo[channel].throttle = 1
-    time.sleep(duration)
-    kit.continuous_servo[channel].throttle = -1
-    time.sleep(duration)
-    
-
-# Spin the servo on the specified channel for 3 seconds at full speed forward
-# shake_servo(servo_channel, 0.25)
-
-'''
-
-
-
-
-
-
 scanCount = 0
 
 description = None
@@ -180,7 +149,7 @@ GPIO.setup(SENSOR_PIN2, GPIO.IN)
 
 # Variable to track the obstacle avoidance sensor state
 prev_obstacle_state = GPIO.HIGH  # Assuming no obstacle initially
-
+'''
 def photoelectric_sensor_detects_pill():
     
     global prev_obstacle_state
@@ -197,7 +166,61 @@ def photoelectric_sensor_detects_pill():
                 return True
             else:
                 print("An obstacle is removed")
-                
+    '''
+
+''' 
+
+kit.continuous_servo[0].throttle = 0
+
+# Function to spin the servo for a specific amount of time
+def shake_servo(channel, duration):
+    # Set the servo to the desired throttle (-1 to 1)
+    evening_pills[index].Echannel.throttle = 0.2
+    #Wait for the specified duration
+    time.sleep(duration)
+    evening_pills[index].Echannel.throttle = -0.2
+    time.sleep(duration)
+    evening_pills[index].Echannel.throttle = 0.2
+    time.sleep(duration)
+    evening_pills[index].Echannel.throttle = -0.2
+    time.sleep(duration)
+    
+
+# Spin the servo on the specified channel for 3 seconds at full speed forward
+# shake_servo(servo_channel, 0.25)
+
+def pillOut(index, duration):
+    # Set the servo to the desired throttle (-1 to 1)
+    evening_pills[index].Echannel.throttle = 0.2
+    #Wait for the specified duration
+    time.sleep(duration)
+    evening_pills[index].Echannel.throttle = -0.2
+    time.sleep(duration)
+    evening_pills[index].Echannel.throttle = 0.2
+    time.sleep(duration)
+    evening_pills[index].Echannel.throttle = -0.2
+    time.sleep(duration)
+
+    global prev_obstacle_state
+    
+    while True:
+        # integrate all four sensors
+        obstacle_state1 = GPIO.input(SENSOR_PIN1)
+        obstacle_state2 = GPIO.input(SENSOR_PIN2)
+
+        
+        
+        if obstacle_state1 != prev_obstacle_state or obstacle_state2 != prev_obstacle_state:
+            if obstacle_state1 == GPIO.LOW or obstacle_state2 == GPIO.LOW:
+                print("An obstacle is detected")
+                evening_pills[index].Echannel.throttle = 0
+                return True
+            else:
+                print("An obstacle is removed")
+    
+'''
+
+
 
 Buzz = GPIO.PWM(Buzzer, 1000)
 GPIO.output(led_pin, GPIO.LOW)
@@ -239,6 +262,7 @@ try:
                     #GUI SWITCHES TO DISPENSING SCREEN
                     print(str(evening_pills[i].Edosage) + " pills dispensing")
                     #evening_pills[i].Echannel.throttle = 0.2 // ACTUALLY SUPPOSED TO CALL A FUNCTION THAT SHAKES AND CHECKS THROUGH SENSORS AT THE SAME TIME
+                    pillOut(i, 0.2)
                     #photoelectric_sensor_detects_pill()
                     #call function that displays the alert for the pill (with parameters)
                     print("restarting loop")
