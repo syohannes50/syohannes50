@@ -5,11 +5,24 @@ import RPi.GPIO as GPIO
 from adafruit_servokit import ServoKit
 import time
 
+evening_pills = []
+
+class Evening:
+    def __init__(self, Ename: str, Econtainer: str, Edosage: int, Equantity: int, Edescription: str):
+        self.Ename = Ename
+        self.Econtainer = Econtainer
+        self.Edosage = Edosage
+        self.Equantity = Equantity
+        self.Echannel = None
+        self.Edescription = Edescription
+
+
 scanCount = 0
 
 description = None
 dosage = None
 frequency = None
+current_color = None
 name = None
 quantity = None
 
@@ -31,10 +44,10 @@ def connect_mqtt() -> mqtt_client:
         else:
             print("Failed to connect, return code %d\n", rc)
 
-    client = mqtt_client.Client(client_id)
+    client = mqtt_client.Client(mqtt_client.CallbackAPIVersion.VERSION1, client_id)
     client.username_pw_set(username, password)
     client.on_connect = on_connect
-    client.connect(broker, port) // currently don't want to use user/pass
+    client.connect(broker, port) 
     return client
 
 
@@ -44,21 +57,33 @@ def subscribe(client: mqtt_client):
         global description, dosage, frequency, quantity, name, scanCount
         print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
         scanCount += 1
-    try:
+        
         # Decode the incoming JSON data
         data = json.loads(msg.payload.decode())
-        
+            
         # Store the received data in the corresponding variables
         description = data.get("description")
         dosage = data.get("dosage")
         quantity = data.get("quantity")
         name = data.get("name")
         frequency = data.get("frequency")
+        current_color = data.get("currentColor")
+            
+            
+        print(name)
+        print(description)
+        print(dosage)
+        print(quantity)
+        print(frequency)
+        print(current_color)
+            
+ 
         
-        
-    except:
-        print("Error: Failed to decode JSON")
-        
+        if scanCount < 3:
+            process_med_info(name, current_color, description, dosage, quantity, frequency, evening_pills)
+        else:
+            evening_pills.clear()
+            scanCount = 0
             
     client.subscribe(topic)
     client.on_message = on_message
@@ -67,36 +92,24 @@ def subscribe(client: mqtt_client):
 
 #------------------------------------------- HANDLES THE EVENING PILLS LIST AND MOTOR ASSIGNMENT
     # Define the evening_pills list
-evening_pills = []
 
-class Evening:
-    def __init__(self, Ename: str, Econtainer: str, Edosage: int, Equantity: int, Edescription: str):
-        self.Ename = Ename
-        self.Econtainer = Econtainer
-        self.Edosage = Edosage
-        self.Equantity = Equantity
-        self.Echannel = None
-        self.Edescription = Edescription
 
 def process_med_info(name, current_color, description, dosage, quantity, frequency, evening_pills): #remove evening_pills as a parameter
-if frequency.lower() == "daily":
-    if _description.lower() == "with food":
+    if frequency.lower() == "daily" or frequency.lower() == "everyday":
+        if description.lower() == "with food":
+            # Instantiate new Evening medicine
+            pill = Evening(Ename=name, Econtainer=current_color, Edescription=description, Edosage=dosage, Equantity=quantity)
+            evening_pills.append(epill)
+            print("New Evening Pill Added:")
+            print(f"Name: {pill.Ename}, Container: {pill.Econtainer}, Description: {pill.Edescription}, Dosage: {pill.Edosage}, Quantity: {pill.Equantity}")
+    else:
         # Instantiate new Evening medicine
         pill = Evening(Ename=name, Econtainer=current_color, Edescription=description, Edosage=dosage, Equantity=quantity)
-        evening_pills.append(epill)
+        evening_pills.append(pill)
         print("New Evening Pill Added:")
         print(f"Name: {pill.Ename}, Container: {pill.Econtainer}, Description: {pill.Edescription}, Dosage: {pill.Edosage}, Quantity: {pill.Equantity}")
-else:
-    # Instantiate new Evening medicine
-    pill = Evening(Ename=name, Econtainer=current_color, Edescription=description, Edosage=dosage, Equantity=quantity)
-    evening_pills.append(pill)
-    print("New Evening Pill Added:")
-    print(f"Name: {pill.Ename}, Container: {pill.Econtainer}, Description: {pill.Edescription}, Dosage: {pill.Edosage}, Quantity: {pill.Equantity}")
 
-
-# Adding a evening pill object to the list
-evening_pills.append(Evening(Econtainer="yellow", Edosage=1, Equantity=0, Edescription="with food"))
-evening_pills.append(Evening(Econtainer="green", Edosage=2, Equantity=0, Edescription="without food"))
+'''
 
 
 for i in range(len(evening_pills)):
@@ -182,19 +195,16 @@ def pillOut(index, duration):
 
 Buzz = GPIO.PWM(Buzzer, 1000)
 GPIO.output(led_pin, GPIO.LOW)
-
+'''
 try:
         #THIS IS THE FIRST THING THAT SHOULD RUN ALWAYS. PRESCRIPTION TRANSFER BEFORE DISPENSING
         client = connect_mqtt()
         subscribe(client)
         client.loop_forever()
         
-
-        if scanCount < 3:
-            process_med_info()
-        else:
-            evening_pills.clear()
-            scanCount = 0
+        
+        '''
+        
 
         #GUI IS STREAK SCREEN
     
@@ -223,6 +233,10 @@ try:
                     #call function that displays the alert for the pill (with parameters)
                     print("end of loop/next pill dispensing")
                     time.sleep(2)
+            #switch back to default screen or screen that says take your pills. maybe motion sensor code????
+'''
+finally:
+    GPIO.cleanup()
             #switch back to default screen or screen that says take your pills. maybe motion sensor code????
 
 finally:
