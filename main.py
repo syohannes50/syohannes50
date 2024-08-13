@@ -84,6 +84,7 @@ def subscribe(client: mqtt_client):
         else:
             evening_pills.clear()
             scanCount = 0
+            process_med_info(name, current_color, description, dosage, quantity, frequency, evening_pills)
             
     client.subscribe(topic)
     client.on_message = on_message
@@ -109,18 +110,17 @@ def process_med_info(name, current_color, description, dosage, quantity, frequen
         print("New Evening Pill Added:")
         print(f"Name: {pill.Ename}, Container: {pill.Econtainer}, Description: {pill.Edescription}, Dosage: {pill.Edosage}, Quantity: {pill.Equantity}")
 
-'''
 
 
 for i in range(len(evening_pills)):
     if evening_pills[i].Econtainer == "blue":
         evening_pills[i].Echannel = kit.continuous_servo[0]
     elif evening_pills[i].Econtainer == "red":
-        evening_pills[i].Echannel = kit.continuous_servo[2]
-    elif evening_pills[i].Econtainer == "green":
         evening_pills[i].Echannel = kit.continuous_servo[4]
+    elif evening_pills[i].Econtainer == "green":
+        evening_pills[i].Echannel = kit.continuous_servo[8]
     elif evening_pills[i].Econtainer == "yellow":
-        evening_pills[i].Echannel = kit.continuous_servo[6]
+        evening_pills[i].Echannel = kit.continuous_servo[12]
         
         
 for pill in evening_pills:
@@ -135,29 +135,31 @@ GPIO.setmode(GPIO.BCM)
 
 #motor isn't moving at first
 kit.continuous_servo[0].throttle = 0
-kit.continuous_servo[2].throttle = 0
 kit.continuous_servo[4].throttle = 0
-kit.continuous_servo[6].throttle = 0
+kit.continuous_servo[8].throttle = 0
+kit.continuous_servo[12].throttle = 0
 
 
 # Set the pin number connected to the ir obstacle avoidance sensor
-switch_pin = 17
-led_pin = 13
-Buzzer = 12
+
+led_pin = 19
+Buzzer = 21
 # all four sensors and the pins
-SENSOR_PIN1 = 18
-SENSOR_PIN2 = 21
-SENSOR_PIN3 = 
-SENSOR_PIN4 = 
+SENSOR_PIN1 = 4
+SENSOR_PIN2 = 17
+SENSOR_PIN3 = 22
+SENSOR_PIN4 = 18
 
 global Buzz 
 
 # Set the GPIO pin as an input
-GPIO.setup(switch_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(led_pin, GPIO.OUT)
 GPIO.setup(Buzzer, GPIO.OUT) 
 GPIO.setup(SENSOR_PIN1, GPIO.IN)
 GPIO.setup(SENSOR_PIN2, GPIO.IN)
+GPIO.setup(SENSOR_PIN3, GPIO.IN)
+GPIO.setup(SENSOR_PIN4, GPIO.IN)
+
 
 
 # Variable to track the obstacle avoidance sensor state
@@ -195,49 +197,51 @@ def pillOut(index, duration):
 
 Buzz = GPIO.PWM(Buzzer, 1000)
 GPIO.output(led_pin, GPIO.LOW)
-'''
+
+
+
 try:
         #THIS IS THE FIRST THING THAT SHOULD RUN ALWAYS. PRESCRIPTION TRANSFER BEFORE DISPENSING
+     
+        for i in range(len(evening_pills)):
+            print(evening_pills[i].Econtainer)
+            for j in range(evening_pills[i].Edosage):
+                #GUI SWITCHES TO DISPENSING SCREEN
+                print(str(evening_pills[i].Edosage) + " pills dispensing")
+                pillOut(i, 0.2)
+                #call function that displays the alert for the pill (with parameters)
+            print("end of loop/next pill dispensing")
+            time.sleep(2)
+            #switch back to default screen or screen that says take your pills. maybe motion sensor code???
+     
+     
         client = connect_mqtt()
         subscribe(client)
         client.loop_forever()
+        time.sleep(20)
+      
+        print("message recieved -- ready to sound alarm")
         
-        
-        '''
-        
+        for pill in evening_pills:
+            print(pill)
 
         #GUI IS STREAK SCREEN
-    
         #two minute timer until the dispensing starts
-        time.sleep(120)
+        #time.sleep(3)
 
         #GUI SWITCHES TO READY TO DISPENSE SCREEN AND ALARMS ARE ON FOR FIVE SECONDS
         print("Ready to Dispense!")
         GPIO.output(led_pin, GPIO.HIGH)
         Buzz.start(20)
         time.sleep(5)
-
+    
+        print("alarm is done--time to dispense")
+        GPIO.output(led_pin, GPIO.LOW)
+        Buzz.stop()
         
-
-        #if BUTTON IS CLICKED ON GUI:
-            GPIO.output(led_pin, GPIO.LOW)
-            Buzz.stop() 
+        print("done?")
+             
             
-            # once the switch is off, run loop to dispense all the evening pills
-            for i in range(len(evening_pills)):
-                print(evening_pills[i].Econtainer)
-                for j in range(evening_pills[i].Edosage):
-                    #GUI SWITCHES TO DISPENSING SCREEN
-                    print(str(evening_pills[i].Edosage) + " pills dispensing")
-                    pillOut(i, 0.2)
-                    #call function that displays the alert for the pill (with parameters)
-                    print("end of loop/next pill dispensing")
-                    time.sleep(2)
-            #switch back to default screen or screen that says take your pills. maybe motion sensor code????
-'''
-finally:
-    GPIO.cleanup()
-            #switch back to default screen or screen that says take your pills. maybe motion sensor code????
-
+            
 finally:
     GPIO.cleanup()
