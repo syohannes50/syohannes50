@@ -1,0 +1,325 @@
+//
+//  ColorViewController.swift
+//  PillPal
+//
+//  Created by Saron on 8/4/24.
+//
+
+import UIKit
+import CocoaMQTT
+
+public struct Morning {
+    var Mname: String
+    var Mcontainer: String
+    var Mdescription: String
+    var Mdosage: Int
+    var Mquantity: Int
+}
+
+public struct Evening {
+    var Ename: String
+    var Econtainer: String
+    var Edescription: String
+    var Edosage: Int
+    var Equantity: Int
+}
+
+public var morningPills: [Morning] = []
+public var eveningPills: [Evening] = []
+
+var scanCount: Int = 0
+
+let mqttClient = CocoaMQTT(clientID: "PiBotApp", host: "mqtt.things.ph", port: 1883)
+
+
+
+class ColorViewController: UIViewController, CocoaMQTTDelegate {
+   
+    
+    override func viewDidLoad(){
+        super.viewDidLoad()
+        
+        mqttClient.delegate = self
+        mqttClient.username = "66b49ce0c762db171066c05a"
+        mqttClient.password = "A1Zhqr0MKXUz7GXdCRAx5FVD"
+        mqttClient.keepAlive = 60
+        mqttClient.cleanSession = true
+        mqttClient.autoReconnect = true
+        
+        mqttClient.connect()
+
+    
+        if scanCount > 3 {
+            scanCount = 0
+        }
+        print("scanCount: ", scanCount)
+        scanCount += 1
+        print("scanCount: ", scanCount)
+        switch scanCount {
+        case 0:
+            self.currentColor = listOfColors[0]
+        case 1:
+            self.currentColor = listOfColors[1]
+        case 2:
+            self.currentColor = listOfColors[2]
+        default:
+            self.currentColor = listOfColors[3]
+        }
+        
+        print("currentColor ", currentColor)
+        changeColor()
+        processSentInfo()
+        processPrescriptionScan()
+        print("done with view loaded")
+        
+        
+        for pill in morningPills {
+            print("Morning Pills:")
+            print("Name: \(pill.Mname)")
+            print("Container: \(pill.Mcontainer)")
+            print("Description: \(pill.Mdescription)")
+            print("Dosage: \(pill.Mdosage)")
+            print("Quantity: \(pill.Mquantity)")
+            print("---------------------")
+        }
+        
+        for pill in eveningPills {
+            print("Evening Pills:")
+            print("Name: \(pill.Ename)")
+            print("Container: \(pill.Econtainer)")
+            print("Description: \(pill.Edescription)")
+            print("Dosage: \(pill.Edosage)")
+            print("Quantity: \(pill.Equantity)")
+            print("---------------------")
+        }
+        
+    }
+    
+   
+    
+    var newDescription: String?
+    var newQuantity: Int?
+    var newDosage: Int?
+    var newFrequency: String?
+    var newName: String?
+    
+    //unwrapped data variables
+    var _description: String = ""
+    var quantity: Int = 0
+    var dosage: Int = 0
+    var frequency: String = ""
+    var name: String = ""
+    
+    
+    
+    func processSentInfo() {
+        // Unwrap only, no need to check if strings are empty
+        if let newDescription = newDescription,
+           let newName = newName,
+           let newFrequency = newFrequency,
+           let newQuantity = newQuantity, newQuantity != 0,
+           let newDosage = newDosage, newDosage != 0 {
+            
+            // Assign to the class properties
+            self._description = newDescription
+            self.quantity = newQuantity
+            self.dosage = newDosage
+            self.name = newName
+            self.frequency = newFrequency
+            
+            // Now you can work with the unwrapped properties
+            // For example, sort into morning or evening, etc.
+            
+        } else {
+            print("nil values or quantity/dosage is 0!!")
+        }
+        
+    }
+    
+    
+    var currentColor: String
+    //var scanCount: Int
+    let listOfColors: [String] = ["Red", "Green", "Blue", "Yellow"]
+
+    
+    required init?(coder aDecoder: NSCoder) {
+        self.currentColor = " "
+        //self.scanCount = 0
+        super.init(coder: aDecoder)
+        
+    }
+    
+   
+
+    
+    @IBOutlet weak var colorLabel: UILabel!
+    
+    
+    func changeColor() {
+        if currentColor == "Red" {
+            colorLabel.text = "Red"
+            self.view.backgroundColor = UIColor.red
+        } else if currentColor == "Green" {
+            colorLabel.text = "Green"
+            self.view.backgroundColor = UIColor.green
+        } else if currentColor == "Blue" {
+            colorLabel.text = "Blue"
+            self.view.backgroundColor = UIColor.blue
+            } else {
+            colorLabel.text = "Yellow"
+            self.view.backgroundColor = UIColor.yellow
+        }
+    }
+
+        
+    func processPrescriptionScan() {
+        
+        if frequency.lowercased() == "daily" {
+            if _description.lowercased() == "empty stomach" || _description.lowercased() == "without food" {
+                // Instantiate new Morning medicine
+                let Mpill = Morning(Mname: name, Mcontainer: currentColor, Mdescription: _description, Mdosage: dosage, Mquantity: quantity)
+                morningPills.append(Mpill)
+                print("New Morning Pill Added:")
+                print("Name: \(Mpill.Mname) ,Container: \(Mpill.Mcontainer), Description: \(Mpill.Mdescription), Dosage: \(Mpill.Mdosage), Quantity: \(Mpill.Mquantity)")
+            } else {
+                // Instantiate new Evening medicine
+                let Epill = Evening(Ename: name, Econtainer: currentColor, Edescription: _description, Edosage: dosage, Equantity: quantity)
+                eveningPills.append(Epill)
+                print("New Evening Pill Added:")
+                print("Name: \(Epill.Ename), Container: \(Epill.Econtainer), Description: \(Epill.Edescription), Dosage: \(Epill.Edosage), Quantity: \(Epill.Equantity)")
+            }
+        } else {
+            // Instantiate new Morning medicine
+            let Mpill = Morning(Mname: name, Mcontainer: currentColor, Mdescription: _description, Mdosage: dosage, Mquantity: quantity)
+            morningPills.append(Mpill)
+            print("New Morning Pill Added:")
+            print("Name: \(Mpill.Mname), Container: \(Mpill.Mcontainer), Description: \(Mpill.Mdescription), Dosage: \(Mpill.Mdosage), Quantity: \(Mpill.Mquantity)")
+            
+            // Instantiate new Evening medicine
+            let Epill = Evening(Ename: name, Econtainer: currentColor, Edescription: _description, Edosage: dosage, Equantity: quantity)
+            eveningPills.append(Epill)
+            print("New Evening Pill Added:")
+            print("Name: \(Epill.Ename), Container: \(Epill.Econtainer), Description: \(Epill.Edescription), Dosage: \(Epill.Edosage), Quantity: \(Epill.Equantity)")
+        }
+    }
+    
+    
+    @IBAction func showScheduleViewController(_ sender: UIButton) {
+        // Convert JSON data to a string
+        
+        let dataToSend: [String: Any] = [
+            "description": _description.lowercased(),
+            "quantity": quantity,
+            "dosage": dosage,
+            "frequency": frequency.lowercased(),
+            "name": name.lowercased(),
+            "currentColor": currentColor.lowercased()
+           ]
+
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: dataToSend, options: []) else {
+            print("Error: Unable to convert data to JSON")
+            return
+        }
+
+        
+        let jsonString = String(data: jsonData, encoding: .utf8)
+
+
+        if let jsonString = jsonString {
+            mqttClient.publish("pibot", withString: jsonString, qos: .qos1)
+        }
+        performSegue(withIdentifier: "showSchedule", sender: nil)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let destinationVC = segue.destination as? ScheduleViewController {
+            destinationVC.recmorningPills = morningPills
+            destinationVC.receveningPills = eveningPills
+            
+        }
+    }
+    
+    
+    //let mqttClient = CocoaMQTT(clientID: "PiBotApp", host: "mqtt.things.ph", port: 1883)
+    //var hello = "hello"
+    
+
+   
+//--------------WILL UNCOMMENT TO TEST MQTT CONNECTION IF NEEDED
+    
+    /*
+    @IBAction func sendMessage(_ sender: UIButton) {
+        print("Sending message:")
+        mqttClient.publish("pibot", withString: hello, qos: .qos1)
+      
+    }*/
+    
+    /*/
+    func connect() {
+        mqttClient.connect()
+    }
+     */
+     
+    
+   /* @IBAction func disconnect(_ sender: UIButton) {
+        mqttClient.disconnect()
+    } */
+    
+    
+    // CocoaMQTTDelegate methods
+    
+    
+    func mqtt(_ mqtt: CocoaMQTT, didPublishMessage message: CocoaMQTTMessage, id: UInt16) {
+        print("yay")
+    }
+    
+    func mqtt(_ mqtt: CocoaMQTT, didPublishAck id: UInt16) {
+        print("did publish")
+        
+    }
+    
+    func mqtt(_ mqtt: CocoaMQTT, didReceiveMessage message: CocoaMQTTMessage, id: UInt16) {
+        print("Received message: \(message.string ?? "") on topic: \(message.topic)")
+    }
+    
+    func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: (any Error)?) {
+        print("disconnected")
+    }
+    
+    func mqtt(_ mqtt: CocoaMQTT, didConnectAck ack: CocoaMQTTConnAck) {
+        print("Connected with ack: \(ack)")
+        if ack == .accept {
+            // Subscribe to topic
+            mqtt.subscribe("pibot")
+        }
+    }
+
+    func mqtt(_ mqtt: CocoaMQTT, didStateChangeTo state: CocoaMQTTConnState) {
+        print("Connection state changed to: \(state)")
+    }
+    
+    func mqtt(_ mqtt: CocoaMQTT, didDisconnectWithError err: Error?) {
+        print("Disconnected with error: \(String(describing: err))")
+    }
+    
+
+    func mqtt(_ mqtt: CocoaMQTT, didSubscribeTopics success: NSDictionary, failed: [String]) {
+        print("Subscribed to topics: \(success), failed topics: \(failed)")
+    }
+
+    func mqtt(_ mqtt: CocoaMQTT, didUnsubscribeTopics topics: [String]) {
+        print("Unsubscribed from topics: \(topics)")
+    }
+    
+    func mqttDidPing(_ mqtt: CocoaMQTT) {
+        print("MQTT did ping")
+    }
+    
+    func mqttDidReceivePong(_ mqtt: CocoaMQTT) {
+        print("MQTT did receive pong")
+    }
+     
+    
+    
+    
+}
