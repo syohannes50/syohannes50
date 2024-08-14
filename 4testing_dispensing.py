@@ -196,7 +196,7 @@ def pillOut(index):
     evening_pills[index].Echannel.throttle = -1
     time.sleep(0.25)
     print("Shook the container!")
-
+    
     global prev_obstacle_state
     
     while True: # !!!! MAY LOOP FOREVER ---- WATCH OUT !!!!
@@ -206,20 +206,19 @@ def pillOut(index):
         obstacle_state2 = GPIO.input(SENSOR_PIN2)
         obstacle_state3 = GPIO.input(SENSOR_PIN3)
         obstacle_state4 = GPIO.input(SENSOR_PIN4)
+
+        evening_pills[index].Echannel.throttle = 0.2 #SPINNING CONTAINER ON SLOW SPEED
         
-        #CHECKS IF ALL THE PHOTELECTRIC SENSORS AREN'T DETECTING ANYTHING (A.K.A. PILLS) !!!--MAYBE DO 'AND' INSTEAD OF 'OR' FOR MAX SAFETY--!!!!
-        if obstacle_state1 == prev_obstacle_state or obstacle_state2 or prev_obstacle_state or obstacle_state3 == prev_obstacle_state or obstacle_state4 == prev_obstacle_state:
-            print("Checked for pills!")
-            if obstacle_state1 != GPIO.LOW or obstacle_state2 != GPIO.LOW or obstacle_state3 != GPIO.LOW or obstacle_state4 != GPIO.LOW:
-                #MAY PUT THIS UNDER FIRST IF-STATEMENT OR OUTSIDE OF THE IF-STATEMENTS
-                evening_pills[index].Echannel.throttle = 0.2 #SLOW SPEED
-                print("pill hasn't dropped")
+        #CHECKS IF ALL THE PHOTELECTRIC SENSORS ARE DETECTING ANYTHING (A.K.A. PILLS) 
+        if obstacle_state1 != prev_obstacle_state or obstacle_state2 != prev_obstacle_state or obstacle_state3 != prev_obstacle_state or obstacle_state4 != prev_obstacle_state:
+            print("Checked if pills dropped")
+            if obstacle_state1 == GPIO.LOW or obstacle_state2 == GPIO.LOW or obstacle_state3 == GPIO.LOW or obstacle_state4 == GPIO.LOW:
+                print("An obstacle is detected -- Pill has dropped")
+                evening_pills[index].Echannel.throttle = 0 #SLOW SPEED
+                print("Exiting out of pillOut..")
+                return True
             else:
-                print("An obstacle is detected")
-                evening_pills[index].Echannel.throttle = 0
-                print("Stopped spinning container")
-                print("Exiting out of while loop....")
-                return True #SHOULD EXIT OUT OF LOOP
+                print("An obstacle is removed")
                 
 
 # SETS THE BUZZER FREQUENCY AND SETS THE LED TO OFF
