@@ -2,7 +2,6 @@ import tkinter
 import customtkinter as ctk
 #----------------------------------------------- CHANGES TO MAIN.PY FOR THE PURPOSE OF THE DISPLAY ---------------------------#
 
-
 class Evening:
     def __init__(self, Ename: str, Econtainer: str, Edosage: int, Equantity: int, Edescription: str, Efrequency: str):
         self.Ename = Ename
@@ -27,9 +26,7 @@ def process_med_info(name, current_color, description, dosage, quantity, frequen
             evening_pills.append(epill)
             print("New Evening Pill Added:")
             print(f"Name: {pill.Ename}, Container: {pill.Econtainer}, Description: {pill.Edescription}, Dosage: {pill.Edosage}, Quantity: {pill.Equantity}, Frequency: {pill.Efrequency}")
-
-
-
+#--------------------------------------------------WILL BE REPLACED BY LAURENS CODE
 
 #theme & color
 ctk.set_appearance_mode("light")
@@ -118,7 +115,7 @@ def next_page():
     button1_clicked = True
     print("button clicked!")
     
-#-------------------------------------------------------- SHOW PAGE FUNCTION
+#-------------------------------------------------------- SHOW PAGE FUNCTION (MAYBE REPLACED BY LAURENS CODE)
 def show_page(index):
     for i, page in enumerate(pages):
         if i == index:
@@ -139,7 +136,7 @@ button1 = ctk.CTkButton(readyframe,
                         hover_color='red',
                         command=next_page)
 button1.place(relx=0.5, rely=0.65, anchor=tkinter.CENTER)
-#------------------------------------------------------- STREAKFRAME TO READYFRAME BUTTON
+#------------------------------------------------------- STREAKFRAME TO READYFRAME BUTTON (MAY BE DELETED)
 button2 = ctk.CTkButton(streakframe,
                         text="next",
                         text_color='black',
@@ -152,7 +149,7 @@ button2 = ctk.CTkButton(streakframe,
                         hover_color='red',
                         command=next_page)
 button2.place(relx=0.5, rely=0.80, anchor=tkinter.CENTER)
-#------------------------------------------------------- STREAKFRAME TO READYFRAME BUTTON
+#------------------------------------------------------- STREAKFRAME TO READYFRAME BUTTON (MAY BE DELETED)
 button3 = ctk.CTkButton(dispenseframe,
                         text="next",
                         text_color='black',
@@ -168,19 +165,17 @@ button3.place(relx=0.5, rely=0.80, anchor=tkinter.CENTER)
 
 window.mainloop()
 
-#DEFINE GLOBAL DAYS VARIABLE
+#DEFINE GLOBAL VARIABLES
 global button1_clicked = False
-
-global name
+global name 
 global days
 global streakCount = 0
-
 global frequencyInt
-#CHANGES FREQUENCY TO INTEGER
 
+#CHANGES THE LABEL OF THE DAYS LEFT FRAME
 def change_days(index):
   global days, frequencyInt
-  #NEEDS TO ACCESS THE PILL OBJECTS FREQUENCY
+  #NEEDS TO ACCESS THE PILL OBJECTS FREQUENCY AND CHANGE IT TO AN INTEGER
   if evening_pills.Efrequency == "twice":
     frequencyInt = 2
   else:
@@ -193,8 +188,6 @@ def change_days(index):
   #setting the name to appropriate value 
   name = evening_pills[index].Ename
 
-  
- 
    
 
 try:
