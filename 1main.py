@@ -41,7 +41,7 @@ client_id = f'publish-{random.randint(0, 1000)}'
 username = '66b49ce0c762db171066c05a' #INPUT USERNAME
 password = 'A1Zhqr0MKXUz7GXdCRAx5FVD' #INPUT PASSWORD
 
-#------------- Connects the rasberry pi to the broker
+#---------------------------------- Connects the rasberry pi to the broker
 def connect_mqtt() -> mqtt_client:
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
@@ -100,7 +100,7 @@ def subscribe(client: mqtt_client):
 
 
 
-#------------------------------------------- FUNCTIONS TO ||CREATE THE PILL OBJECTS|| INTO THE EVENING_PILLS LIST AND DO ||MOTOR ASSIGNMENT|| BASED OF COLOR OF CONTAINER
+#-------------- FUNCTIONS TO ||CREATE THE PILL OBJECTS|| INTO THE EVENING_PILLS LIST AND DO ||MOTOR ASSIGNMENT|| BASED OF COLOR OF CONTAINER
 
 
 def process_med_info(name, current_color, description, dosage, quantity, frequency, evening_pills): 
@@ -169,10 +169,10 @@ GPIO.setup(SENSOR_PIN4, GPIO.IN)
 
 
 # VARIABLE TO TRACK THE STATE OF THE PHOTOELECTRIC SENSOR
-prev_obstacle_state = GPIO.HIGH  # Assuming no obstacle initially
+prev_obstacle_state = GPIO.HIGH  # Assuming no obstacle initially (FIGURE OUT IF THIS IS THE CORRECT SETTING)
 
-#----------------------------!!!---FUNCTION THAT DISPENSES PILLS USING SERVOS AND PHOTO SENSORS---!!! VERY IMPORTANT
 
+#----------------------------!!!---FUNCTION THAT DISPENSES PILLS USING SERVOS AND PHOTO SENSORS---!!! VERY IMPORTANT (FIX IMMEDIATELY)
 def pillOut(index, duration):
     # Set the servo to the desired throttle (-1 to 1)
     evening_pills[index].Echannel.throttle = 0.2
@@ -187,15 +187,18 @@ def pillOut(index, duration):
 
     global prev_obstacle_state
     
-    while True:
-        # integrate all four sensors
+    while True: # !!!! MAY LOOP FOREVER ---- WATCH OUT !!!!
+        
+        # INTEGRATE ALL FOUR SENSORS
         obstacle_state1 = GPIO.input(SENSOR_PIN1)
         obstacle_state2 = GPIO.input(SENSOR_PIN2)
+        obstacle_state3 = GPIO.input(SENSOR_PIN3)
+        obstacle_state4 = GPIO.input(SENSOR_PIN4)
 
-        if obstacle_state1 == prev_obstacle_state or obstacle_state2 == prev_obstacle_state:
+        if obstacle_state1 == prev_obstacle_state and obstacle_state2 and prev_obstacle_state and obstacle_state3 == prev_obstacle_state and obstacle_state4 == prev_obstacle_state:
             if obstacle_state1 != GPIO.LOW or obstacle_state2 != GPIO.LOW:
-                print("pill hasn't dropped")
                 evening_pills[index].Echannel.throttle = 0.5
+                print("pill hasn't dropped")
                 sleep(duration)
             else:
                 print("An obstacle is detected")
