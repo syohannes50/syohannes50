@@ -18,7 +18,7 @@ streakframe = ctk.CTkFrame (window,
 streak = ctk.CTkLabel(streakframe,
                       width = 800,
                       height = 500,
-                      text = "You're on a \n [] day streak!",
+                      text = "You're on a \n {streakCount} day streak!",
                       font = ('Sans-Serif', 40, 'bold')),
                       fg_color = '#ffb9d5'
 streak.place(relx=0.35, rely=0.5, anchor=tkinter.CENTER)
@@ -151,7 +151,7 @@ window.mainloop()
 
 #DEFINE GLOBAL DAYS VARIABLE
 global days
-global streakCount
+global streakCount = 0
 
 global frequency = "twice"
 global frequencyInt
@@ -229,7 +229,10 @@ try:
             print("Next container is dispensing...")
             time.sleep(1)
         '''
-        
+        #INCREMENTING STREAKCOUNT BY ONE EACH TIME DISPENSING IS DONE || INCREMENT BEFORE DISPLAYING IT !!!!!
+
+  
+        #TESTING THE NAVIGATION BETWEEN FRAMES WITHOUT BUTTONS
         count = 2
         show_page(count)
         count = 3
