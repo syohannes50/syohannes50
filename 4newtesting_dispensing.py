@@ -4,7 +4,7 @@ import json
 import RPi.GPIO as GPIO
 from adafruit_servokit import ServoKit
 import time
-import Adafruit_PCA9685 #PROBLEM WITH IMPORTING
+import Adafruit_PCA9685 
 
 
 #declares 16 channels
@@ -265,9 +265,6 @@ try:
         
         set_servos()
         print("Assigned the pill objects to servos!")
-        # Hesitant about this for loop
-        for pill in evening_pills:
-            print(pill)
 
         #FOURTH: SOUND THE ALARM, TURN ON LED, AND DISPLAY READYFRAME ON GUI
         print("Ready to Dispense!")
