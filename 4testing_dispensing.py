@@ -12,7 +12,7 @@ kit = ServoKit(channels=16)
 # defines and initializes an empty array to hold the evening pills
 evening_pills = []
 
-#defines the evening class to make evening_pill objects with 6 properties 
+#defines the evening class to make evening_pill objects with 6 properties (UPDATE TO 7 FOR GUI)
 class Evening:
     def __init__(self, Ename: str, Econtainer: str, Edosage: int, Equantity: int, Edescription: str):
         self.Ename = Ename
