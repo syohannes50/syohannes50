@@ -250,7 +250,7 @@ evening_pills.append(Evening(Ename="pill3", Econtainer="green", Edosage=2, Equan
 
 try:
         #PUT IN A TIME.SLEEP() SOMEWHERE TO ACT AS A TIMER FOR HOW LONG IT TAKES TO SCAN A PRESCRIPTION
-        
+        stop.servos()
         '''
         #FIRST: MQTT CONNECTION & APP TO PI INFO TRANSFER
         client = connect_mqtt()
