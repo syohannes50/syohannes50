@@ -280,7 +280,7 @@ daysframe.pack_propagate(False)
 label3 = ctk.CTkLabel(readyframe,
                       width = 800,
                       height = 500,
-                      text = "You have 10 day(s) of Cymbalta left",
+                      text = "You have 10 day(s) of Cymbalta left", #days = variable 
                       text_color = 'black',
                       font = ('Sans-Serif', 35, 'bold'),
                       fg_color = '#ffb9d5')
