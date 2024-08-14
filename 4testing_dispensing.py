@@ -263,7 +263,7 @@ try:
             for j in range(evening_pills[i].Edosage):
                 #GUI SWITCHES TO DISPENSING SCREEN
                 print(str(evening_pills[i].Edosage) + " pills dispensing")
-                print("calling pillOut")
+                print("Calling pillOut(), dispensing has started.")
                 pillOut(i)
                 print("Exit completed. Next pill is dispensing...")
                 #CALL FUNCTION THAT DISPLAYS THE DAYS LEFT FRAME (WITH PARAMETERS TO ACCESS DATA)
