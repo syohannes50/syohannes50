@@ -378,7 +378,8 @@ try:
             print(pill)
 
 
-        #FOURTH: SOUND THE ALARM, TURN ON LED, AND DISPLAY READYFRAME ON GUI
+        #FOURTH: SOUND THE ALARM, TURN ON LED
+        #DISPLAY READYFRAME ON GUI
         print("Ready to Dispense!")
         GPIO.output(led_pin, GPIO.HIGH)
         Buzz.start(20)
