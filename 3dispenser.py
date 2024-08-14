@@ -230,13 +230,12 @@ try:
         #INSTEAD OF TIMER DO CONDITIONALS WITH THE GUI FRAMES AND BUTTON (EX: IF BUTTON IS CLICKED CALL FUNCTION TO MOVE ON TO DISPENSING)
         time.sleep(5)
 
-    
+        
         #FIFTH: TURN OFF LED AND BUZZER, DISPENSE THE PILLS!!!
         print("Alarm has sounded -- Time to dispense!")
         GPIO.output(led_pin, GPIO.LOW)
         Buzz.stop()
-    
-        
+        # if button1_clicked == True:
         for i in range(len(evening_pills)):
             print(evening_pills[i].Econtainer + " dispensing")
             for j in range(evening_pills[i].Edosage):
@@ -256,8 +255,10 @@ try:
             print("Next container is dispensing...")
             time.sleep(1)
         '''
+        # button1_clicked == False (to reset)
         #INCREMENTING STREAKCOUNT BY ONE EACH TIME DISPENSING IS DONE || INCREMENT BEFORE DISPLAYING IT !!!!!
-
+        streakCount += 1
+        #show the streakframe
   
         #TESTING THE NAVIGATION BETWEEN FRAMES WITHOUT BUTTONS
         count = 2
