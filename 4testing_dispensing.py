@@ -123,6 +123,12 @@ def process_med_info(name, current_color, description, dosage, quantity, frequen
         print("New Evening Pill Added:")
         print(f"Name: {pill.Ename}, Container: {pill.Econtainer}, Description: {pill.Edescription}, Dosage: {pill.Edosage}, Quantity: {pill.Equantity}")
 
+# -----------------------------------ADDING THREE EVENING PILL OBJECTS TO THE LIST
+evening_pills.append(Evening(Ename="pill1", Econtainer="blue", Edosage=1, Equantity=10, Edescription="with food"))
+evening_pills.append(Evening(Ename="pill2", Econtainer="red", Edosage=1, Equantity=20, Edescription="with food"))
+evening_pills.append(Evening(Ename="pill3", Econtainer="green", Edosage=2, Equantity=30, Edescription="with food"))
+
+
 #--------------------!!!!----MAY NEED TO CALL WITH PARAMETER: (EVENING_PILLS)------!!!
 def set_servos():
     for i in range(len(evening_pills)):
@@ -132,7 +138,7 @@ def set_servos():
             evening_pills[i].Echannel = kit.continuous_servo[4]
         elif evening_pills[i].Econtainer == "green":
             evening_pills[i].Echannel = kit.continuous_servo[8]
-        elif evening_pills[i].Econtainer == "yellow":
+        elif evening_pills[i].Econtainer == "purple":
             evening_pills[i].Echannel = kit.continuous_servo[12]
     #PRINTS OUT AND CHECKS IF THE MOTORS HAVE BEEN ASSIGNED ACCORDINGLY
     for pill in evening_pills:
