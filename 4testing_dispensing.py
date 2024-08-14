@@ -107,7 +107,6 @@ def subscribe(client: mqtt_client):
 
 #-------------- FUNCTIONS TO ||CREATE THE PILL OBJECTS|| INTO THE EVENING_PILLS LIST AND DO ||MOTOR ASSIGNMENT|| BASED OF COLOR OF CONTAINER
 
-
 def process_med_info(name, current_color, description, dosage, quantity, frequency, evening_pills): 
     if frequency.lower() == "daily" or frequency.lower() == "everyday" or frequency.lower() == "once":
         if description.lower() == "with food":
@@ -141,8 +140,7 @@ def set_servos():
         
         
 
-#--------------------------------------------- CODE TO RUN THE DISPENSER
-
+#----------------------------------------------------- CODE TO RUN THE DISPENSER
 
 # Set the GPIO mode to BCM 
 GPIO.setmode(GPIO.BCM)
