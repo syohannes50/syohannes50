@@ -104,7 +104,7 @@ def subscribe(client: mqtt_client):
 
 
 def process_med_info(name, current_color, description, dosage, quantity, frequency, evening_pills): 
-    if frequency.lower() == "daily" or frequency.lower() == "everyday":
+    if frequency.lower() == "daily" or frequency.lower() == "everyday" or frequency.lower() == "once":
         if description.lower() == "with food":
             # Instantiate new Evening medicine
             pill = Evening(Ename=name, Econtainer=current_color, Edescription=description, Edosage=dosage, Equantity=quantity)
@@ -147,6 +147,8 @@ kit.continuous_servo[4].throttle = 0
 kit.continuous_servo[8].throttle = 0
 kit.continuous_servo[12].throttle = 0
 
+#DECLARES GLOBAL VARIABLE "BUZZ"
+global Buzz 
 
 # SETTING GPIO PIN NUMBERS FOR THE LED, BUZZER, AND ALL THE SENSORS
 led_pin = 19
@@ -157,9 +159,7 @@ SENSOR_PIN2 = 17
 SENSOR_PIN3 = 22
 SENSOR_PIN4 = 18
 
-global Buzz 
-
-# Set the GPIO pin as an input
+# -----------------------------SETS THE GPIO PINS AS AN INPUT OR OUTPUT
 GPIO.setup(led_pin, GPIO.OUT)
 GPIO.setup(Buzzer, GPIO.OUT) 
 GPIO.setup(SENSOR_PIN1, GPIO.IN)
@@ -168,9 +168,10 @@ GPIO.setup(SENSOR_PIN3, GPIO.IN)
 GPIO.setup(SENSOR_PIN4, GPIO.IN)
 
 
-
-# Variable to track the obstacle avoidance sensor state
+# VARIABLE TO TRACK THE STATE OF THE PHOTOELECTRIC SENSOR
 prev_obstacle_state = GPIO.HIGH  # Assuming no obstacle initially
+
+#----------------------------!!!---FUNCTION THAT DISPENSES PILLS USING SERVOS AND PHOTO SENSORS---!!! VERY IMPORTANT
 
 def pillOut(index, duration):
     # Set the servo to the desired throttle (-1 to 1)
