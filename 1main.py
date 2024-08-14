@@ -233,7 +233,7 @@ try:
         client = connect_mqtt()
         subscribe(client)
         print("Exit out of subscribe complete") #MAY NEED TO MOVE THIS FOR TESTING PURPOSES
-        client.loop_forever() #MAY NOT NEED TO BE HERE: FIND OTHER PLACE FOR IT
+        client.loop_start() #LOOP_START() RUNS MESSAGING IT ON A BACKGROUND THREAD || CAN EXECUTE CODE BELOW
 
         #SECOND: EXIT OUT OF MQTT LOOP
         print("Message recieved -- Ready to sound alarm!")
