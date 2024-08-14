@@ -173,7 +173,7 @@ prev_obstacle_state = GPIO.HIGH  # Assuming no obstacle initially (FIGURE OUT IF
 
 
 #----------------------------!!!---FUNCTION THAT DISPENSES PILLS USING SERVOS AND PHOTO SENSORS---!!! VERY IMPORTANT (FIX IMMEDIATELY)
-def pillOut(index, duration):
+def pillOut(index):
     # Set the servo to the desired throttle (-1 to 1)
     evening_pills[index].Echannel.throttle = 1
     #Wait for the specified duration
@@ -194,7 +194,8 @@ def pillOut(index, duration):
         obstacle_state2 = GPIO.input(SENSOR_PIN2)
         obstacle_state3 = GPIO.input(SENSOR_PIN3)
         obstacle_state4 = GPIO.input(SENSOR_PIN4)
-
+        
+        #CHECKS IF ALL THE PHOTELECTRIC SENSORS AREN'T DETECTING ANYTHING (A.K.A. PILLS)
         if obstacle_state1 == prev_obstacle_state and obstacle_state2 and prev_obstacle_state and obstacle_state3 == prev_obstacle_state and obstacle_state4 == prev_obstacle_state:
             if obstacle_state1 != GPIO.LOW or obstacle_state2 != GPIO.LOW or obstacle_state3 != GPIO.LOW or obstacle_state4 != GPIO.LOW:
                 evening_pills[index].Echannel.throttle = 0.2 #SLOW SPEED
@@ -218,7 +219,7 @@ try:
             for j in range(evening_pills[i].Edosage):
                 #GUI SWITCHES TO DISPENSING SCREEN
                 print(str(evening_pills[i].Edosage) + " pills dispensing")
-                pillOut(i, 0.2)
+                pillOut(i)
                 #call function that displays the alert for the pill (with parameters)
             print("end of loop/next pill dispensing")
             time.sleep(2)
