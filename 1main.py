@@ -95,13 +95,15 @@ def subscribe(client: mqtt_client):
             scanCount = 0
             #creates a pill object
             process_med_info(name, current_color, description, dosage, quantity, frequency, evening_pills)
-
-            #EXIT OUT OF THIS FUNCTION!!!!!!!!
-
-
-    
+            
+    #------------------EXIT OUT OF THIS FUNCTION!!!!!!!!
+   
     client.subscribe(topic)
     client.on_message = on_message
+    #waiting 30 seconds for person to scan
+    time.sleep(30)
+    print("Exiting out of subscribe...")
+    return True
 
 
 
@@ -226,7 +228,7 @@ try:
         client = connect_mqtt()
         subscribe(client)
         client.loop_forever() #MAY NOT NEED TO BE HERE: FIND OTHER PLACE FOR IT
-        
+
         #SECOND: EXIT OUT OF MQTT LOOP
         print("Message recieved -- Ready to sound alarm!")
     
