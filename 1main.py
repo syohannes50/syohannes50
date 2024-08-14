@@ -5,6 +5,7 @@ import RPi.GPIO as GPIO
 from adafruit_servokit import ServoKit
 import time
 
+
 #declares 16 channels
 kit = ServoKit(channels=16)
 
@@ -94,7 +95,11 @@ def subscribe(client: mqtt_client):
             scanCount = 0
             #creates a pill object
             process_med_info(name, current_color, description, dosage, quantity, frequency, evening_pills)
-            
+
+            #EXIT OUT OF THIS FUNCTION!!!!!!!!
+
+
+    
     client.subscribe(topic)
     client.on_message = on_message
 
@@ -195,8 +200,8 @@ def pillOut(index):
         obstacle_state3 = GPIO.input(SENSOR_PIN3)
         obstacle_state4 = GPIO.input(SENSOR_PIN4)
         
-        #CHECKS IF ALL THE PHOTELECTRIC SENSORS AREN'T DETECTING ANYTHING (A.K.A. PILLS)
-        if obstacle_state1 == prev_obstacle_state and obstacle_state2 and prev_obstacle_state and obstacle_state3 == prev_obstacle_state and obstacle_state4 == prev_obstacle_state:
+        #CHECKS IF ALL THE PHOTELECTRIC SENSORS AREN'T DETECTING ANYTHING (A.K.A. PILLS) !!!--MAYBE DO 'AND' INSTEAD OF 'OR' FOR MAX SAFETY--!!!!
+        if obstacle_state1 == prev_obstacle_state or obstacle_state2 or prev_obstacle_state or obstacle_state3 == prev_obstacle_state or obstacle_state4 == prev_obstacle_state:
             if obstacle_state1 != GPIO.LOW or obstacle_state2 != GPIO.LOW or obstacle_state3 != GPIO.LOW or obstacle_state4 != GPIO.LOW:
                 evening_pills[index].Echannel.throttle = 0.2 #SLOW SPEED
                 print("pill hasn't dropped")
@@ -210,49 +215,53 @@ def pillOut(index):
 Buzz = GPIO.PWM(Buzzer, 1000)
 GPIO.output(led_pin, GPIO.LOW)
 
+#SOMEWHERE UP HERE, SET UP STREAK SCREEN AND DEFINE ALL THE FRAMES, BUTTONS, AND FUNCTIONS
+
 
 try:
-        #THIS IS THE FIRST THING THAT SHOULD RUN ALWAYS. PRESCRIPTION TRANSFER BEFORE DISPENSING
-     
+        #PUT IN A TIME.SLEEP() SOMEWHERE TO ACT AS A TIMER FOR HOW LONG IT TAKES TO SCAN A PRESCRIPTION
+        
+    
+        #FIRST: MQTT CONNECTION & APP TO PI INFO TRANSFER
+        client = connect_mqtt()
+        subscribe(client)
+        client.loop_forever() #MAY NOT NEED TO BE HERE: FIND OTHER PLACE FOR IT
+        
+        #SECOND: EXIT OUT OF MQTT LOOP
+        print("Message recieved -- Ready to sound alarm!")
+    
+        #THIRD: SET THE PILL OBJETS TO THE SERVOS & PRINT TO CHECK IF THE PILL OBJECTS ARE THERE BEFORE DISPENSING
+        set_servos()
+        for pill in evening_pills:
+            print(pill)
+
+
+        #FOURTH: SOUND THE ALARM, TURN ON LED, AND DISPLAY READYFRAME ON GUI
+
+        print("Ready to Dispense!")
+        GPIO.output(led_pin, GPIO.HIGH)
+        Buzz.start(20)
+        #INSTEAD OF TIMER DO CONDITIONALS WITH THE GUI FRAMES AND BUTTON (EX: IF BUTTON IS CLICKED CALL FUNCTION TO MOVE ON TO DISPENSING)
+        time.sleep(5)
+
+    
+        #FIFTH: TURN OFF LED AND BUZZER, DISPENSE THE PILLS!!!
+        print("Alarm has sounded -- Time to dispense!")
+        GPIO.output(led_pin, GPIO.LOW)
+        Buzz.stop()
+    
         for i in range(len(evening_pills)):
             print(evening_pills[i].Econtainer)
             for j in range(evening_pills[i].Edosage):
                 #GUI SWITCHES TO DISPENSING SCREEN
                 print(str(evening_pills[i].Edosage) + " pills dispensing")
                 pillOut(i)
-                #call function that displays the alert for the pill (with parameters)
+                #CALL FUNCTION THAT DISPLAYS THE DAYS LEFT FRAME (WITH PARAMETERS TO ACCESS DATA)
             print("end of loop/next pill dispensing")
-            time.sleep(2)
-            #switch back to default screen or screen that says take your pills. maybe motion sensor code???
-     
-     
-        client = connect_mqtt()
-        subscribe(client)
-        client.loop_forever()
-        time.sleep(20)
-      
-        print("message recieved -- ready to sound alarm")
-        
-        for pill in evening_pills:
-            print(pill)
-
-        #GUI IS STREAK SCREEN
-        #two minute timer until the dispensing starts
-        #time.sleep(3)
-
-        #GUI SWITCHES TO READY TO DISPENSE SCREEN AND ALARMS ARE ON FOR FIVE SECONDS
-        print("Ready to Dispense!")
-        GPIO.output(led_pin, GPIO.HIGH)
-        Buzz.start(20)
-        time.sleep(5)
-    
-        print("alarm is done--time to dispense")
-        GPIO.output(led_pin, GPIO.LOW)
-        Buzz.stop()
-        
-        print("done?")
-             
+            time.sleep(1)
             
+        print("Finished Dispensing!") 
+        #SWITCH BACK TO STREAK SCREEN
             
 finally:
     GPIO.cleanup()
