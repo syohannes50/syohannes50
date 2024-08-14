@@ -191,11 +191,12 @@ def pillOut(index):
     time.sleep(0.25)
     evening_pills[index].Echannel.throttle = -1
     time.sleep(0.25)
+    print("Shook the container!")
 
     global prev_obstacle_state
     
     while True: # !!!! MAY LOOP FOREVER ---- WATCH OUT !!!!
-        
+        print("Starting while loop!")
         # INTEGRATE ALL FOUR SENSORS
         obstacle_state1 = GPIO.input(SENSOR_PIN1)
         obstacle_state2 = GPIO.input(SENSOR_PIN2)
@@ -204,12 +205,16 @@ def pillOut(index):
         
         #CHECKS IF ALL THE PHOTELECTRIC SENSORS AREN'T DETECTING ANYTHING (A.K.A. PILLS) !!!--MAYBE DO 'AND' INSTEAD OF 'OR' FOR MAX SAFETY--!!!!
         if obstacle_state1 == prev_obstacle_state or obstacle_state2 or prev_obstacle_state or obstacle_state3 == prev_obstacle_state or obstacle_state4 == prev_obstacle_state:
+            print("Checked for pills!")
             if obstacle_state1 != GPIO.LOW or obstacle_state2 != GPIO.LOW or obstacle_state3 != GPIO.LOW or obstacle_state4 != GPIO.LOW:
+                #MAY PUT THIS UNDER FIRST IF-STATEMENT OR OUTSIDE OF THE IF-STATEMENTS
                 evening_pills[index].Echannel.throttle = 0.2 #SLOW SPEED
                 print("pill hasn't dropped")
             else:
                 print("An obstacle is detected")
                 evening_pills[index].Echannel.throttle = 0
+                print("Stopped spinning container")
+                print("Exiting out of while loop....")
                 return True #SHOULD EXIT OUT OF LOOP
                 
 
@@ -235,6 +240,8 @@ try:
     
         #THIRD: SET THE PILL OBJETS TO THE SERVOS & PRINT TO CHECK IF THE PILL OBJECTS ARE THERE BEFORE DISPENSING
         set_servos()
+        print("Assigned the pill objects to servos!")
+        # Hesitant about this for loop
         for pill in evening_pills:
             print(pill)
 
@@ -253,13 +260,15 @@ try:
         Buzz.stop()
     
         for i in range(len(evening_pills)):
-            print(evening_pills[i].Econtainer)
+            print(evening_pills[i].Econtainer + " dispensing")
             for j in range(evening_pills[i].Edosage):
                 #GUI SWITCHES TO DISPENSING SCREEN
                 print(str(evening_pills[i].Edosage) + " pills dispensing")
+                print("calling pillOut")
                 pillOut(i)
+                print("Exit completed. Next pill is dispensing...")
                 #CALL FUNCTION THAT DISPLAYS THE DAYS LEFT FRAME (WITH PARAMETERS TO ACCESS DATA)
-            print("end of loop/next pill dispensing")
+            print("Next container is dispensing...")
             time.sleep(1)
             
         print("Finished Dispensing!") 
