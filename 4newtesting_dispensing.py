@@ -250,19 +250,10 @@ evening_pills.append(Evening(Ename="pill3", Econtainer="green", Edosage=2, Equan
 
 try:
         #PUT IN A TIME.SLEEP() SOMEWHERE TO ACT AS A TIMER FOR HOW LONG IT TAKES TO SCAN A PRESCRIPTION
+        #SERVOS DON'T MOVE AT FIRST
         stop.servos()
-        '''
-        #FIRST: MQTT CONNECTION & APP TO PI INFO TRANSFER
-        client = connect_mqtt()
-        subscribe(client)
-        client.loop_forever() #MAY NOT NEED TO BE HERE: FIND OTHER PLACE FOR IT
-        
-        #SECOND: EXIT OUT OF MQTT LOOP
-        print("Message recieved -- Ready to sound alarm!")
-        '''
   
-        #THIRD: SET THE PILL OBJETS TO THE SERVOS & PRINT TO CHECK IF THE PILL OBJECTS ARE THERE BEFORE DISPENSING
-        
+        #THIRD: SET THE PILL OBJETS TO THE SERVOS
         set_servos()
         print("Assigned the pill objects to servos!")
 
