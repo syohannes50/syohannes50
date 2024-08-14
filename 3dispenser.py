@@ -5,22 +5,26 @@ import customtkinter as ctk
 ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("dark-blue")
 
-
 #window size & title
 window = ctk.CTk()
 window.title('PillPal GUI')
 window.geometry("800x480")
 
-#---------------------------------------------STREAKFRAME
-streakframe = ctk.CTkLabel(window,
-                  width = 800,
-                  height = 500,
-                  text = "",
-                  fg_color = '#ffb9d5')
+#-------------------------------------------------STREAKFRAME
+streakframe = ctk.CTkFrame (window,
+                           width = 800,
+                           height = 480)
+
+streak = ctk.CTkLabel(streakframe,
+                      width = 800,
+                      height = 500,
+                      text = "You're on a \n [] day streak!",
+                      font = ('Sans-Serif', 40, 'bold')),
+                      fg_color = '#ffb9d5'
+streak.place(relx=0.35, rely=0.5, anchor=tkinter.CENTER)
+
 streakframe.pack(padx=5, pady=5)
 streakframe.pack_propagate(False)
-
-#-------------------------------------------STREAKFRAME LABELS
 
 hi = ctk.CTkLabel(streakframe,
                   width = 800,
@@ -31,16 +35,8 @@ hi = ctk.CTkLabel(streakframe,
                   font = ('Sans-Serif', 30, 'bold'))
 hi.pack(padx=10, pady=10)
 
-streak = ctk.CTkLabel(streakframe,
-                      text = "You're on a \n [] day streak!",
-                      font = ('Sans-Serif', 40, 'bold'))
-streak.place(relx=0.35, rely=0.5, anchor=tkinter.CENTER)
 
-
-
-#window size & title
-
-#-------------------------------------------------------READY FRAME STUFF
+#------------------------------------------------------------READY FRAME 
 readyframe = ctk.CTkFrame (window,
                            width = 800,
                            height = 480)
@@ -57,7 +53,7 @@ label1.place(relx=0.5, rely=0.45, anchor=tkinter.CENTER)
 
 
 
-#-------------------------------------------------------DISPENSE FRAME STUFF
+#-------------------------------------------------------DISPENSE FRAME 
 
 dispenseframe = ctk.CTkFrame (window,
                               width = 800,
@@ -75,7 +71,6 @@ label2.place(relx=0.5, rely=0.5, anchor=tkinter.CENTER)
 
 
 
-
 #---------------------------------------------DAYS LEFT FRAME STUFF
 
 daysframe = ctk.CTkFrame (window,
@@ -83,14 +78,14 @@ daysframe = ctk.CTkFrame (window,
                            height = 480)
 daysframe.pack(padx=5, pady=5)
 daysframe.pack_propagate(False)
-days1 = ctk.CTkLabel(readyframe,
+label3 = ctk.CTkLabel(readyframe,
                       width = 800,
                       height = 500,
                       text = "You have 10 day(s) of Cymbalta left",
                       text_color = 'black',
                       font = ('Sans-Serif', 35, 'bold'),
                       fg_color = '#ffb9d5')
-days1.place(relx=0.5, rely=0.55, anchor=tkinter.CENTER)
+label3.place(relx=0.5, rely=0.55, anchor=tkinter.CENTER)
 
 hello = ctk.CTkLabel(readyframe,
                   width = 800,
