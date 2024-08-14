@@ -15,13 +15,14 @@ evening_pills = []
 
 #defines the evening class to make evening_pill objects with 6 properties (UPDATE TO 7 FOR GUI)
 class Evening:
-    def __init__(self, Ename: str, Econtainer: str, Edosage: int, Equantity: int, Edescription: str):
+    def __init__(self, Ename: str, Econtainer: str, Edosage: int, Equantity: int, Edescription: str, Efrequency: str):
         self.Ename = Ename
         self.Econtainer = Econtainer
         self.Edosage = Edosage
         self.Equantity = Equantity
         self.Echannel = None
         self.Edescription = Edescription
+        self.Efrequency
 
 #keeps track of number of scans
 scanCount = 0
@@ -112,17 +113,16 @@ def process_med_info(name, current_color, description, dosage, quantity, frequen
     if frequency.lower() == "daily" or frequency.lower() == "everyday" or frequency.lower() == "once":
         if description.lower() == "with food":
             # Instantiate new Evening medicine
-            pill = Evening(Ename=name, Econtainer=current_color, Edescription=description, Edosage=dosage, Equantity=quantity)
+            pill = Evening(Ename=name, Econtainer=current_color, Edescription=description, Edosage=dosage, Equantity=quantity, Efrequency = frequency)
             evening_pills.append(epill)
             print("New Evening Pill Added:")
-            print(f"Name: {pill.Ename}, Container: {pill.Econtainer}, Description: {pill.Edescription}, Dosage: {pill.Edosage}, Quantity: {pill.Equantity}")
+            print(f"Name: {pill.Ename}, Container: {pill.Econtainer}, Description: {pill.Edescription}, Dosage: {pill.Edosage}, Quantity: {pill.Equantity}, Frequency: {pill.Efrequency}")
     else:
         # Instantiate new Evening medicine
-        pill = Evening(Ename=name, Econtainer=current_color, Edescription=description, Edosage=dosage, Equantity=quantity)
-        evening_pills.append(pill)
-        print("New Evening Pill Added:")
-        print(f"Name: {pill.Ename}, Container: {pill.Econtainer}, Description: {pill.Edescription}, Dosage: {pill.Edosage}, Quantity: {pill.Equantity}")
-
+        pill = Evening(Ename=name, Econtainer=current_color, Edescription=description, Edosage=dosage, Equantity=quantity, Efrequency = frequency)
+            evening_pills.append(epill)
+            print("New Evening Pill Added:")
+            print(f"Name: {pill.Ename}, Container: {pill.Econtainer}, Description: {pill.Edescription}, Dosage: {pill.Edosage}, Quantity: {pill.Equantity}, Frequency: {pill.Efrequency}")
 
 #--------------------!!!!----MAY NEED TO CALL WITH PARAMETER: (EVENING_PILLS)------!!!
 def set_servos():
