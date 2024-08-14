@@ -177,13 +177,13 @@ def pillOut(index, duration):
     # Set the servo to the desired throttle (-1 to 1)
     evening_pills[index].Echannel.throttle = 0.2
     #Wait for the specified duration
-    time.sleep(duration)
+    time.sleep(1)
     evening_pills[index].Echannel.throttle = -0.2
-    time.sleep(duration)
+    time.sleep(1)
     evening_pills[index].Echannel.throttle = 0.2
-    time.sleep(duration)
+    time.sleep(1)
     evening_pills[index].Echannel.throttle = -0.2
-    time.sleep(duration)
+    time.sleep(1)
 
     global prev_obstacle_state
     
@@ -196,19 +196,18 @@ def pillOut(index, duration):
         obstacle_state4 = GPIO.input(SENSOR_PIN4)
 
         if obstacle_state1 == prev_obstacle_state and obstacle_state2 and prev_obstacle_state and obstacle_state3 == prev_obstacle_state and obstacle_state4 == prev_obstacle_state:
-            if obstacle_state1 != GPIO.LOW or obstacle_state2 != GPIO.LOW:
-                evening_pills[index].Echannel.throttle = 0.5
+            if obstacle_state1 != GPIO.LOW or obstacle_state2 != GPIO.LOW or obstacle_state3 != GPIO.LOW or obstacle_state4 != GPIO.LOW:
+                evening_pills[index].Echannel.throttle = 0.2 #SLOW SPEED
                 print("pill hasn't dropped")
-                sleep(duration)
             else:
                 print("An obstacle is detected")
                 evening_pills[index].Echannel.throttle = 0
-                return True
+                return True #SHOULD EXIT OUT OF LOOP
+                
 
-
+# SETS THE BUZZER FREQUENCY AND SETS THE LED TO OFF
 Buzz = GPIO.PWM(Buzzer, 1000)
 GPIO.output(led_pin, GPIO.LOW)
-
 
 
 try:
