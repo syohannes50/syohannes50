@@ -175,15 +175,15 @@ prev_obstacle_state = GPIO.HIGH  # Assuming no obstacle initially (FIGURE OUT IF
 #----------------------------!!!---FUNCTION THAT DISPENSES PILLS USING SERVOS AND PHOTO SENSORS---!!! VERY IMPORTANT (FIX IMMEDIATELY)
 def pillOut(index, duration):
     # Set the servo to the desired throttle (-1 to 1)
-    evening_pills[index].Echannel.throttle = 0.2
+    evening_pills[index].Echannel.throttle = 1
     #Wait for the specified duration
-    time.sleep(1)
-    evening_pills[index].Echannel.throttle = -0.2
-    time.sleep(1)
-    evening_pills[index].Echannel.throttle = 0.2
-    time.sleep(1)
-    evening_pills[index].Echannel.throttle = -0.2
-    time.sleep(1)
+    time.sleep(0.25)
+    evening_pills[index].Echannel.throttle = -1
+    time.sleep(0.25)
+    evening_pills[index].Echannel.throttle = 1
+    time.sleep(0.25)
+    evening_pills[index].Echannel.throttle = -1
+    time.sleep(0.25)
 
     global prev_obstacle_state
     
