@@ -42,7 +42,7 @@ client_id = f'publish-{random.randint(0, 1000)}'
 username = '66b49ce0c762db171066c05a' #INPUT USERNAME
 password = 'A1Zhqr0MKXUz7GXdCRAx5FVD' #INPUT PASSWORD
 
-#---------------------------------- Connects the rasberry pi to the broker
+#---------------------------------- Connects the Rasberry Pi to the broker and Exits
 def connect_mqtt() -> mqtt_client:
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
@@ -57,7 +57,7 @@ def connect_mqtt() -> mqtt_client:
     return client
 
 
-#--------------------------------------Subscribes to messages published on the topic
+#--------------------------------------Subscribes to messages published on the topic and Exits
 def subscribe(client: mqtt_client):
     #----------Deals with the message received 
     def on_message(client, userdata, msg):
@@ -101,7 +101,7 @@ def subscribe(client: mqtt_client):
     client.subscribe(topic)
     client.on_message = on_message
     #waiting 30 seconds for person to scan
-    time.sleep(30)
+    time.sleep(30) #MAY HAVE TO MOVE THIS DEPENDING ON HOW CODE RESPONDS
     print("Exiting out of subscribe...")
     return True
 
@@ -138,7 +138,7 @@ def set_servos():
             evening_pills[i].Echannel = kit.continuous_servo[12]
     #PRINTS OUT AND CHECKS IF THE MOTORS HAVE BEEN ASSIGNED ACCORDINGLY
     for pill in evening_pills:
-        print(f"Container: {pill.Econtainer}, GPIO Pin: {pill.Echannel}")
+        print(f"Container: {pill.Econtainer}, Servo Channel: {pill.Echannel}")
         
         
 
@@ -221,12 +221,13 @@ GPIO.output(led_pin, GPIO.LOW)
 
 
 try:
-        #PUT IN A TIME.SLEEP() SOMEWHERE TO ACT AS A TIMER FOR HOW LONG IT TAKES TO SCAN A PRESCRIPTION
+        #!!!-----PUT IN A TIME.SLEEP() SOMEWHERE TO ACT AS A TIMER FOR HOW LONG IT TAKES TO SCAN A PRESCRIPTION------!!!
         
     
-        #FIRST: MQTT CONNECTION & APP TO PI INFO TRANSFER
+        #FIRST: MQTT CONNECTION & APP TO RASPI INFO TRANSFER
         client = connect_mqtt()
         subscribe(client)
+        print("Exit out of subscribe complete") #MAY NEED TO MOVE THIS FOR TESTING PURPOSES
         client.loop_forever() #MAY NOT NEED TO BE HERE: FIND OTHER PLACE FOR IT
 
         #SECOND: EXIT OUT OF MQTT LOOP
@@ -239,7 +240,6 @@ try:
 
 
         #FOURTH: SOUND THE ALARM, TURN ON LED, AND DISPLAY READYFRAME ON GUI
-
         print("Ready to Dispense!")
         GPIO.output(led_pin, GPIO.HIGH)
         Buzz.start(20)
