@@ -22,7 +22,7 @@ class Evening:
         self.Equantity = Equantity
         self.Echannel = None
         self.Edescription = Edescription
-        self.Efrequency
+        self.Efrequency = Efrequency
 
 #keeps track of number of scans
 scanCount = 0
@@ -104,6 +104,10 @@ def subscribe(client: mqtt_client):
     
     client.subscribe(topic)
     client.on_message = on_message
+    #waiting 30 seconds for person to scan
+    #MAY HAVE TO MOVE THIS DEPENDING ON HOW CODE RESPONDS
+    print("Exiting out of subscribe...")
+    return True
 
 
 
@@ -120,9 +124,9 @@ def process_med_info(name, current_color, description, dosage, quantity, frequen
     else:
         # Instantiate new Evening medicine
         pill = Evening(Ename=name, Econtainer=current_color, Edescription=description, Edosage=dosage, Equantity=quantity, Efrequency = frequency)
-            evening_pills.append(epill)
-            print("New Evening Pill Added:")
-            print(f"Name: {pill.Ename}, Container: {pill.Econtainer}, Description: {pill.Edescription}, Dosage: {pill.Edosage}, Quantity: {pill.Equantity}, Frequency: {pill.Efrequency}")
+        evening_pills.append(epill)
+        print("New Evening Pill Added:")
+        print(f"Name: {pill.Ename}, Container: {pill.Econtainer}, Description: {pill.Edescription}, Dosage: {pill.Edosage}, Quantity: {pill.Equantity}, Frequency: {pill.Efrequency}")
 
 #--------------------!!!!----MAY NEED TO CALL WITH PARAMETER: (EVENING_PILLS)------!!!
 def set_servos():
@@ -143,16 +147,30 @@ def set_servos():
 
 #----------------------------------------------------- CODE TO RUN THE DISPENSER
 
-# Initialize the PWM device using the default address (0x40).
-pwm = Adafruit_PCA9685.PCA9685()
+
+
+# Create a PCA9685 instance with a specific I2C bus number.
+pwm = Adafruit_PCA9685.PCA9685(address=0x40, busnum=1)  # Replace `1` with your bus number
+
+
 
 # Set the PWM frequency to 60Hz, which is common for servos.
 pwm.set_pwm_freq(60)
+# 
+# def set_servo_angle(channel, angle):
+#     pulse_width = int((angle / 180.0 * 2000) + 1000)  # Convert angle to pulse width (1000-2000µs)
+#     pwm.set_pwm(channel, 0, int(pulse_width * 4096 / 20000))  # Map pulse width to PWM value
+
 
 #THE MOTORS SHOULD NOT BE SPINNING WHEN THE CODE IS FIRST RUN !!!----MAY NEED TO BE CALLED IN A DIFFERENT LOCATION----!!!
+
+def pulse_width_to_pwm(pulse_width_us):
+    return int(pulse_width_us * 4096 / 20000)
+
 def stop_servos():
-  for channel in range(16):
-      pwm.set_pwm(channel, 0, 307)  # Stop all servos
+    neutral_pwm_value = pulse_width_to_pwm(0)  # Typically around 307
+    for channel in range(16):
+        pwm.set_pwm(channel, 0, neutral_pwm_value)
 
 
 # Set the GPIO mode to BCM 
@@ -180,6 +198,7 @@ GPIO.setup(SENSOR_PIN4, GPIO.IN)
 
 # Function to map throttle to PWM with channel as a parameter
 def set_throttle(channel, throttle_value):
+    global pwm_value
     if throttle_value == 1:
         pwm_value = 409  # Full speed one direction
     elif throttle_value == -1:
@@ -189,8 +208,9 @@ def set_throttle(channel, throttle_value):
   
 #SECOND FUNCITON TO CHANGE THROTTLE
 def set_throttle2(channel, throttle_value):
-    pwm_value = int(307 + (throttle_value * 102))
-    pwm.set_pwm(channel, 0, pwm_value)
+    global pwm_value2
+    pwm_value2 = int(throttle_value)
+    pwm.set_pwm(channel, 0, pwm_value2)
 
 # VARIABLE TO TRACK THE STATE OF THE PHOTOELECTRIC SENSOR
 prev_obstacle_state = GPIO.HIGH  # Assuming no obstacle initially (FIGURE OUT IF THIS IS THE CORRECT SETTING)
@@ -210,27 +230,27 @@ def pillOut(index):
     set_throttle(evening_pills[index].Echannel, -1)
     time.sleep(0.25)
 
-    print("Shook the container on channel", channel)
+    print("Shook the container on channel", evening_pills[index].Echannel)
 
-    
+    set_throttle2(evening_pills[index].Echannel, 10)
     global prev_obstacle_state
-    
+    print("Starting while loop!")
     while True: # !!!! MAY LOOP FOREVER ---- WATCH OUT !!!!
-        print("Starting while loop!")
+        
         # INTEGRATE ALL FOUR SENSORS
         obstacle_state1 = GPIO.input(SENSOR_PIN1)
         obstacle_state2 = GPIO.input(SENSOR_PIN2)
         obstacle_state3 = GPIO.input(SENSOR_PIN3)
         obstacle_state4 = GPIO.input(SENSOR_PIN4)
 
-        set_throttle(evening_pills[index].Echannel, 0.25) #SPINNING CONTAINER ON SLOW SPEED
+         #SPINNING CONTAINER ON SLOW SPEED
         
         #CHECKS IF ALL THE PHOTELECTRIC SENSORS ARE DETECTING ANYTHING (A.K.A. PILLS) 
         if obstacle_state1 != prev_obstacle_state or obstacle_state2 != prev_obstacle_state or obstacle_state3 != prev_obstacle_state or obstacle_state4 != prev_obstacle_state:
             print("Checked if pills dropped")
             if obstacle_state1 == GPIO.LOW or obstacle_state2 == GPIO.LOW or obstacle_state3 == GPIO.LOW or obstacle_state4 == GPIO.LOW:
                 print("An obstacle is detected -- Pill has dropped")
-                set_throttle(evening_pills[index].Echannel, 0.25) #SLOW SPEED
+                set_throttle2(evening_pills[index].Echannel, 0) #SLOW SPEED
                 print("Exiting out of pillOut..")
                 return True
             else:
@@ -244,15 +264,22 @@ GPIO.output(led_pin, GPIO.LOW)
 #SOMEWHERE UP HERE, SET UP STREAK SCREEN AND DEFINE ALL THE FRAMES, BUTTONS, AND FUNCTIONS
 
 # -----------------------------------ADDING THREE EVENING PILL OBJECTS TO THE LIST
-evening_pills.append(Evening(Ename="pill1", Econtainer="blue", Edosage=1, Equantity=10, Edescription="with food"))
-evening_pills.append(Evening(Ename="pill2", Econtainer="red", Edosage=1, Equantity=20, Edescription="with food"))
-evening_pills.append(Evening(Ename="pill3", Econtainer="green", Edosage=2, Equantity=30, Edescription="with food"))
+evening_pills.append(Evening(Ename="pill1", Econtainer="blue", Edosage=1, Equantity=10, Edescription="with food", Efrequency ="twice"))
+evening_pills.append(Evening(Ename="pill2", Econtainer="red", Edosage=1, Equantity=20, Edescription="with food", Efrequency ="twice"))
+evening_pills.append(Evening(Ename="pill3", Econtainer="green", Edosage=2, Equantity=30, Edescription="with food", Efrequency ="twice"))
+
 
 try:
         #PUT IN A TIME.SLEEP() SOMEWHERE TO ACT AS A TIMER FOR HOW LONG IT TAKES TO SCAN A PRESCRIPTION
         #SERVOS DON'T MOVE AT FIRST
-        stop.servos()
-  
+        stop_servos()
+        
+        #FIRST: MQTT CONNECTION & APP TO RASPI INFO TRANSFER
+        client = connect_mqtt()
+        subscribe(client)
+        print("Exit out of subscribe complete") #MAY NEED TO MOVE THIS FOR TESTING PURPOSES
+        client.loop_start() #LOOP_START() RUNS MESSAGING IT ON A BACKGROUND THREAD || CAN EXECUTE CODE BELOW
+        time.sleep(10)
         #THIRD: SET THE PILL OBJETS TO THE SERVOS
         set_servos()
         print("Assigned the pill objects to servos!")
