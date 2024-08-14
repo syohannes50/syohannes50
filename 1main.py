@@ -4,6 +4,8 @@ import json
 import RPi.GPIO as GPIO
 from adafruit_servokit import ServoKit
 import time
+import tkinter
+import customtkinter as ctk
 
 
 #declares 16 channels
@@ -314,6 +316,14 @@ def next_page():
         page.pack(padx=5, pady=5)
     else:
         print("You are already on the last page.")
+#-------------------------------------------------------- SHOW PAGE FUNCTION
+def show_page(index):
+    for i, page in enumerate(pages):
+        if i == index:
+            page.pack(fill='both', expand=True)  # Show the frame
+        else:
+            page.pack_forget()  # Hide all other frames
+
 #--------------------------------------------------- DISPENSE NOW BUTTON
 button1 = ctk.CTkButton(readyframe,
                         text="Dispense Now",
@@ -359,8 +369,8 @@ window.mainloop()
 
 try:
         #!!!-----PUT IN A TIME.SLEEP() SOMEWHERE TO ACT AS A TIMER FOR HOW LONG IT TAKES TO SCAN A PRESCRIPTION------!!!
-        
-    
+        count = 0
+        show_page(count)
         #FIRST: MQTT CONNECTION & APP TO RASPI INFO TRANSFER
         client = connect_mqtt()
         subscribe(client)
@@ -377,7 +387,8 @@ try:
         for pill in evening_pills:
             print(pill)
 
-
+        count = 1
+        show_page(count)
         #FOURTH: SOUND THE ALARM, TURN ON LED
         #DISPLAY READYFRAME ON GUI
         print("Ready to Dispense!")
@@ -392,19 +403,26 @@ try:
         GPIO.output(led_pin, GPIO.LOW)
         Buzz.stop()
     
+    
         for i in range(len(evening_pills)):
             print(evening_pills[i].Econtainer + " dispensing")
             for j in range(evening_pills[i].Edosage):
+                count = 2
+                show_page(count)
                 #GUI SWITCHES TO DISPENSING SCREEN
                 print(str(evening_pills[i].Edosage) + " pills dispensing")
                 print("calling pillOut")
                 pillOut(i)
                 print("Exit completed. Next pill is dispensing...")
+                count = 3
+                show_page(count)
                 #CALL FUNCTION THAT DISPLAYS THE DAYS LEFT FRAME (WITH PARAMETERS TO ACCESS DATA)
             print("Next container is dispensing...")
             time.sleep(1)
             
         print("Finished Dispensing!") 
+        count = 0
+        show_page(count)
         #SWITCH BACK TO STREAK SCREEN
             
 finally:
