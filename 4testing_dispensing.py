@@ -209,17 +209,17 @@ def pillOut(index):
         
         #CHECKS IF ALL THE PHOTELECTRIC SENSORS AREN'T DETECTING ANYTHING (A.K.A. PILLS) !!!--MAYBE DO 'AND' INSTEAD OF 'OR' FOR MAX SAFETY--!!!!
         if obstacle_state1 == prev_obstacle_state or obstacle_state2 or prev_obstacle_state or obstacle_state3 == prev_obstacle_state or obstacle_state4 == prev_obstacle_state:
-          print("Checked for pills!")
-          if obstacle_state1 != GPIO.LOW or obstacle_state2 != GPIO.LOW or obstacle_state3 != GPIO.LOW or obstacle_state4 != GPIO.LOW:
-              #MAY PUT THIS UNDER FIRST IF-STATEMENT OR OUTSIDE OF THE IF-STATEMENTS
-              evening_pills[index].Echannel.throttle = 0.2 #SLOW SPEED
-              print("pill hasn't dropped")
-          else:
-              print("An obstacle is detected")
-              evening_pills[index].Echannel.throttle = 0
-              print("Stopped spinning container")
-              print("Exiting out of while loop....")
-              return True #SHOULD EXIT OUT OF LOOP
+            print("Checked for pills!")
+            if obstacle_state1 != GPIO.LOW or obstacle_state2 != GPIO.LOW or obstacle_state3 != GPIO.LOW or obstacle_state4 != GPIO.LOW:
+            #MAY PUT THIS UNDER FIRST IF-STATEMENT OR OUTSIDE OF THE IF-STATEMENTS
+                evening_pills[index].Echannel.throttle = 0.2 #SLOW SPEED
+                print("pill hasn't dropped")
+            else:
+                print("An obstacle is detected")
+                evening_pills[index].Echannel.throttle = 0
+                print("Stopped spinning container")
+                print("Exiting out of while loop....")
+                return True #SHOULD EXIT OUT OF LOOP
                 
 
 # SETS THE BUZZER FREQUENCY AND SETS THE LED TO OFF
