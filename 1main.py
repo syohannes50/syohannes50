@@ -204,7 +204,8 @@ def pillOut(index):
         obstacle_state3 = GPIO.input(SENSOR_PIN3)
         obstacle_state4 = GPIO.input(SENSOR_PIN4)
 
-        evening_pills[index].Echannel.throttle = 0.2 #SLOW SPEED
+        evening_pills[index].Echannel.throttle = 0.2 #SPINNING CONTAINER ON SLOW SPEED
+        
         #CHECKS IF ALL THE PHOTELECTRIC SENSORS ARE DETECTING ANYTHING (A.K.A. PILLS) 
         if obstacle_state1 != prev_obstacle_state or obstacle_state2 != prev_obstacle_state or obstacle_state3 != prev_obstacle_state or obstacle_state4 != prev_obstacle_state:
             print("Checked if pills dropped")
@@ -216,8 +217,6 @@ def pillOut(index):
             else:
                 print("An obstacle is removed")
                 
-
-
 
 # SETS THE BUZZER FREQUENCY AND SETS THE LED TO OFF
 Buzz = GPIO.PWM(Buzzer, 1000)
