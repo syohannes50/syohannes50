@@ -64,7 +64,7 @@ daysframe.pack_propagate(False)
 label3 = ctk.CTkLabel(readyframe,
                       width = 800,
                       height = 500,
-                      text = "You have {days} day(s) of {evening_pills[index].Ename} left", #days = variable 
+                      text = "You have {days} day(s) of {name} left", #days = variable 
                       text_color = 'black',
                       font = ('Sans-Serif', 35, 'bold'),
                       fg_color = '#ffb9d5')
@@ -84,22 +84,10 @@ count = 0
 
 #-------------------------------------------------------------NEXT PAGE FUNCTION
 def next_page():
-    global count
-    global pages  # Ensure pages is declared as a global variable if used elsewhere
-
-    if count < len(pages) - 1:
-        # Hide all pages
-        for p in pages:
-            p.pack_forget()
-        
-        # Increment the page index
-        count += 1
-
-        # Show the new page
-        page = pages[count]
-        page.pack(padx=5, pady=5)
-    else:
-        print("You are already on the last page.")
+    #set flag to true when button is clicked
+    button1_clicked = True
+    print("button clicked!")
+    
 #-------------------------------------------------------- SHOW PAGE FUNCTION
 def show_page(index):
     for i, page in enumerate(pages):
@@ -107,6 +95,7 @@ def show_page(index):
             page.pack(fill='both', expand=True)  # Show the frame
         else:
             page.pack_forget()  # Hide all other frames
+          
 #--------------------------------------------------- DISPENSE NOW BUTTON
 button1 = ctk.CTkButton(readyframe,
                         text="Dispense Now",
@@ -150,28 +139,33 @@ button3.place(relx=0.5, rely=0.80, anchor=tkinter.CENTER)
 window.mainloop()
 
 #DEFINE GLOBAL DAYS VARIABLE
+global button1_clicked = False
+
+global name
 global days
 global streakCount = 0
 
-global frequency = "twice"
 global frequencyInt
 #CHANGES FREQUENCY TO INTEGER
-if frequency == "twice":
-  frequencyInt = 2
-else:
-  frequencyInt = 1
 
-
-def show_days(index):
+def change_days(index):
   global days, frequencyInt
+  #NEEDS TO ACCESS THE PILL OBJECTS FREQUENCY
   if evening_pills.Efrequency == "twice":
-  frequencyInt = 2
-else:
-  frequencyInt = 1
-  if 2 == index:
-    evening_pills.Edosage x frequencyInt
+    frequencyInt = 2
   else:
-    page.pack_forget()  # Hide all other frames
+    frequencyInt = 1
+    
+  total_pills_taken = evening_pills.Edosage * frequencyInt
+  days = evening_pills.Equantity / total_pills_taken
+  print("Number of days left: " + days)
+  
+  #setting the name to appropriate value 
+  name = evening_pills[index].Ename
+
+  
+ 
+   
 
 try:
         #!!!-----PUT IN A TIME.SLEEP() SOMEWHERE TO ACT AS A TIMER FOR HOW LONG IT TAKES TO SCAN A PRESCRIPTION------!!!
@@ -216,16 +210,19 @@ try:
         for i in range(len(evening_pills)):
             print(evening_pills[i].Econtainer + " dispensing")
             for j in range(evening_pills[i].Edosage):
-                count = 2
-                show_page(count)
-                #GUI SWITCHES TO DISPENSING SCREEN
+                if button1_clicked == True:
+                  count = 2
+                  #GUI SWITCHES TO DISPENSING SCREEN
+                  show_page(count)
+                  button1_clicked = False
                 print(str(evening_pills[i].Edosage) + " pills dispensing")
                 print("calling pillOut")
                 pillOut(i)
-                print("Exit completed. Next pill is dispensing...")
                 count = 3
+                #DISPLAYS THE DAYS LEFT FRAME (WITH PARAMETERS TO ACCESS DATA)
+                change_days(i)
                 show_page(count)
-                #CALL FUNCTION THAT DISPLAYS THE DAYS LEFT FRAME (WITH PARAMETERS TO ACCESS DATA)
+                print("Exit completed. Next pill is dispensing...")
             print("Next container is dispensing...")
             time.sleep(1)
         '''
