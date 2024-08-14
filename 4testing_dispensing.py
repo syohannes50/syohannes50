@@ -211,7 +211,7 @@ def pillOut(index):
         if obstacle_state1 == prev_obstacle_state or obstacle_state2 or prev_obstacle_state or obstacle_state3 == prev_obstacle_state or obstacle_state4 == prev_obstacle_state:
             print("Checked for pills!")
             if obstacle_state1 != GPIO.LOW or obstacle_state2 != GPIO.LOW or obstacle_state3 != GPIO.LOW or obstacle_state4 != GPIO.LOW:
-            #MAY PUT THIS UNDER FIRST IF-STATEMENT OR OUTSIDE OF THE IF-STATEMENTS
+                #MAY PUT THIS UNDER FIRST IF-STATEMENT OR OUTSIDE OF THE IF-STATEMENTS
                 evening_pills[index].Echannel.throttle = 0.2 #SLOW SPEED
                 print("pill hasn't dropped")
             else:
