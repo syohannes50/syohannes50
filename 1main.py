@@ -5,8 +5,13 @@ import RPi.GPIO as GPIO
 from adafruit_servokit import ServoKit
 import time
 
+#declares 16 channels
+kit = ServoKit(channels=16)
+
+# defines and initializes an empty array to hold the evening pills
 evening_pills = []
 
+#defines the evening class to make evening_pill objects with 6 properties 
 class Evening:
     def __init__(self, Ename: str, Econtainer: str, Edosage: int, Equantity: int, Edescription: str):
         self.Ename = Ename
@@ -16,16 +21,16 @@ class Evening:
         self.Echannel = None
         self.Edescription = Edescription
 
-
+#keeps track of number of scans
 scanCount = 0
-
+#variables representing pill information -- used later to create pill objects
+name = None
 description = None
 dosage = None
 frequency = None
 current_color = None
-name = None
 quantity = None
-
+# ------------------------------------------------MQTT information for broker
 broker = 'mqtt.things.ph' #INPUT BROKER NAME
 port = 1883
 topic = "pibot" #INPUT TOPIC NAME
@@ -36,7 +41,7 @@ client_id = f'publish-{random.randint(0, 1000)}'
 username = '66b49ce0c762db171066c05a' #INPUT USERNAME
 password = 'A1Zhqr0MKXUz7GXdCRAx5FVD' #INPUT PASSWORD
 
-
+#------------- Connects the rasberry pi to the broker
 def connect_mqtt() -> mqtt_client:
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
@@ -51,11 +56,13 @@ def connect_mqtt() -> mqtt_client:
     return client
 
 
-#Prints the recieved message
+#--------------------------------------Subscribes to messages published on the topic
 def subscribe(client: mqtt_client):
+    #----------Deals with the message received 
     def on_message(client, userdata, msg):
         global description, dosage, frequency, quantity, name, scanCount
         print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
+        #Identifies a scan has just occured, increments by 1
         scanCount += 1
         
         # Decode the incoming JSON data
@@ -68,22 +75,24 @@ def subscribe(client: mqtt_client):
         name = data.get("name")
         frequency = data.get("frequency")
         current_color = data.get("currentColor")
-            
-            
+
         print(name)
         print(description)
         print(dosage)
-        print(quantity)
         print(frequency)
         print(current_color)
-            
+        print(quantity)
  
-        
+        #checks if there has been less or more than 4 scans
         if scanCount < 3:
+            #creates a pill object
             process_med_info(name, current_color, description, dosage, quantity, frequency, evening_pills)
         else:
+            #clears out the list of pill objects
             evening_pills.clear()
+            #sets the scanCount back to 0
             scanCount = 0
+            #creates a pill object
             process_med_info(name, current_color, description, dosage, quantity, frequency, evening_pills)
             
     client.subscribe(topic)
@@ -91,11 +100,10 @@ def subscribe(client: mqtt_client):
 
 
 
-#------------------------------------------- HANDLES THE EVENING PILLS LIST AND MOTOR ASSIGNMENT
-    # Define the evening_pills list
+#------------------------------------------- FUNCTIONS TO ||CREATE THE PILL OBJECTS|| INTO THE EVENING_PILLS LIST AND DO ||MOTOR ASSIGNMENT|| BASED OF COLOR OF CONTAINER
 
 
-def process_med_info(name, current_color, description, dosage, quantity, frequency, evening_pills): #remove evening_pills as a parameter
+def process_med_info(name, current_color, description, dosage, quantity, frequency, evening_pills): 
     if frequency.lower() == "daily" or frequency.lower() == "everyday":
         if description.lower() == "with food":
             # Instantiate new Evening medicine
@@ -110,41 +118,40 @@ def process_med_info(name, current_color, description, dosage, quantity, frequen
         print("New Evening Pill Added:")
         print(f"Name: {pill.Ename}, Container: {pill.Econtainer}, Description: {pill.Edescription}, Dosage: {pill.Edosage}, Quantity: {pill.Equantity}")
 
-
-
-for i in range(len(evening_pills)):
-    if evening_pills[i].Econtainer == "blue":
-        evening_pills[i].Echannel = kit.continuous_servo[0]
-    elif evening_pills[i].Econtainer == "red":
-        evening_pills[i].Echannel = kit.continuous_servo[4]
-    elif evening_pills[i].Econtainer == "green":
-        evening_pills[i].Echannel = kit.continuous_servo[8]
-    elif evening_pills[i].Econtainer == "yellow":
-        evening_pills[i].Echannel = kit.continuous_servo[12]
+#--------------------!!!!----MAY NEED TO CALL WITH PARAMETER: (EVENING_PILLS)------!!!
+def set_servos():
+    for i in range(len(evening_pills)):
+        if evening_pills[i].Econtainer == "blue":
+            evening_pills[i].Echannel = kit.continuous_servo[0]
+        elif evening_pills[i].Econtainer == "red":
+            evening_pills[i].Echannel = kit.continuous_servo[4]
+        elif evening_pills[i].Econtainer == "green":
+            evening_pills[i].Echannel = kit.continuous_servo[8]
+        elif evening_pills[i].Econtainer == "yellow":
+            evening_pills[i].Echannel = kit.continuous_servo[12]
+    #PRINTS OUT AND CHECKS IF THE MOTORS HAVE BEEN ASSIGNED ACCORDINGLY
+    for pill in evening_pills:
+        print(f"Container: {pill.Econtainer}, GPIO Pin: {pill.Echannel}")
         
         
-for pill in evening_pills:
-    print(f"Container: {pill.Econtainer}, GPIO Pin: {pill.Echannel}")
 
 #--------------------------------------------- CODE TO RUN THE DISPENSER
 
-kit = ServoKit(channels=16)
 
-# Set the GPIO mode to BCM (Broadcom SOC channel numbering)
+# Set the GPIO mode to BCM 
 GPIO.setmode(GPIO.BCM)
 
-#motor isn't moving at first
+#THE MOTORS SHOULD NOT BE SPINNING WHEN THE CODE IS FIRST RUN !!!----MAY NEED TO BE CALLED IN A DIFFERENT LOCATION----!!!
 kit.continuous_servo[0].throttle = 0
 kit.continuous_servo[4].throttle = 0
 kit.continuous_servo[8].throttle = 0
 kit.continuous_servo[12].throttle = 0
 
 
-# Set the pin number connected to the ir obstacle avoidance sensor
-
+# SETTING GPIO PIN NUMBERS FOR THE LED, BUZZER, AND ALL THE SENSORS
 led_pin = 19
 Buzzer = 21
-# all four sensors and the pins
+# all four sensors
 SENSOR_PIN1 = 4
 SENSOR_PIN2 = 17
 SENSOR_PIN3 = 22
