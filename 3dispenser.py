@@ -83,7 +83,7 @@ pages = [streakframe, readyframe, dispenseframe, daysframe]
 count = 0
 
 #-------------------------------------------------------------NEXT PAGE FUNCTION
-def next_page():
+def button():
     #set flag to true when button is clicked
     button1_clicked = True
     print("button clicked!")
