@@ -124,9 +124,9 @@ button1 = ctk.CTkButton(readyframe,
                         border_width=5,
                         border_color='red',
                         hover_color='red',
-                        command=next_page)
+                        command=show_page(2))
 button1.place(relx=0.5, rely=0.65, anchor=tkinter.CENTER)
-
+'''
 #------------------------------------------------------- STREAKFRAME TO READYFRAME BUTTON (MAY BE DELETED)
 button2 = ctk.CTkButton(streakframe,
                         text="next",
@@ -138,7 +138,7 @@ button2 = ctk.CTkButton(streakframe,
                         border_width=5,
                         border_color='red',
                         hover_color='red',
-                        command=next_page)
+                        command=show_page(1))
 button2.place(relx=0.5, rely=0.80, anchor=tkinter.CENTER)
 #------------------------------------------------------- STREAKFRAME TO READYFRAME BUTTON (MAY BE DELETED)
 button3 = ctk.CTkButton(dispenseframe,
@@ -151,9 +151,22 @@ button3 = ctk.CTkButton(dispenseframe,
                         border_width=5,
                         border_color='red',
                         hover_color='red',
-                        command=next_page)
+                        command=show_page(3))
 button3.place(relx=0.5, rely=0.80, anchor=tkinter.CENTER)
 
+button3 = ctk.CTkButton(daysframe,
+                        text="next",
+                        text_color='black',
+                        font = ('Sans-Serif', 20, 'bold'),
+                        width=300,
+                        height=75,
+                        fg_color='#ff78ae',
+                        border_width=5,
+                        border_color='red',
+                        hover_color='red',
+                        command=show_page(0))
+button3.place(relx=0.5, rely=0.80, anchor=tkinter.CENTER)
+'''
 window.mainloop()
 
 
