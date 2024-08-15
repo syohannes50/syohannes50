@@ -1,31 +1,46 @@
 import tkinter
+from tkinter import *
 import customtkinter as ctk
 import time
 
+#DEFINE GLOBAL VARIABLES FOR GUI
+button1_clicked = False
+name = ""
+days = 0
+streakCount = 0
+frequencyInt = 0
+
 #theme & color
 ctk.set_appearance_mode("light")
-ctk.set_default_color_theme("dark-blue")
+ctk.set_default_color_theme("blue")
 
 #window size & title
 window = ctk.CTk()
 window.title('PillPal GUI')
 window.geometry("800x480")
 
-#----------------------------------------------------------STREAKFRAME
-streakframe = ctk.CTkFrame (window,
-                           width = 800,
-                           height = 480)
 
-streak = ctk.CTkLabel(self,
-                      text = "You're on a \n [] day streak!",
-                      font = ('Sans-Serif', 40, 'bold'),
-                      fg_color = '#ffb9d5')
-streak.pack()
-
-streak.place(relx=0.35, rely=0.5, anchor=tkinter.CENTER)
-
+#----------------------------------------------------------STREAKFRAME (needs background)
+streakframe = ctk.CTkFrame(window, 
+                           width=800, 
+                           height=480)
 streakframe.pack(padx=5, pady=5)
 streakframe.pack_propagate(False)
+
+hi = ctk.CTkLabel(streakframe, 
+                  width=800, 
+                  height=80, 
+                  text="Hi, PillPal User", 
+                  fg_color='#ffff9c', 
+                  text_color='black', 
+                  font=('Sans-Serif', 30, 'bold'))
+hi.pack(padx=10, pady=10)
+
+streak = ctk.CTkLabel(streakframe, 
+                      text="You're on a \n {streakCount} day streak!", 
+                      font=('Sans-Serif', 40, 'bold'), 
+                      fg_color='#ffb9d5')
+streak.place(relx=0.5, rely=0.5, anchor=tkinter.CENTER)
 #------------------------------------------------------------READY FRAME 
 readyframe = ctk.CTkFrame (window,
                            width = 800,
@@ -35,7 +50,7 @@ readyframe.pack_propagate(False)
 label1 = ctk.CTkLabel(readyframe,
                       width = 800,
                       height = 500,
-                      text = "It's time to take your medication",
+                      text = "It's time to take your medication.",
                       text_color = 'black',
                       font = ('Sans-Serif', 35, 'bold'),
                       fg_color = '#ffb9d5')
@@ -62,16 +77,16 @@ daysframe = ctk.CTkFrame (window,
                            height = 480)
 daysframe.pack(padx=5, pady=5)
 daysframe.pack_propagate(False)
-label3 = ctk.CTkLabel(readyframe,
+label3 = ctk.CTkLabel(daysframe,
                       width = 800,
                       height = 500,
-                      text = "You have {days} day(s) of {name} left", #days = variable 
+                      text = "You have {days} day(s) of {name} left", #days = v$
                       text_color = 'black',
                       font = ('Sans-Serif', 35, 'bold'),
                       fg_color = '#ffb9d5')
 label3.place(relx=0.5, rely=0.55, anchor=tkinter.CENTER)
 
-hello = ctk.CTkLabel(readyframe,
+hello = ctk.CTkLabel(daysframe,
                   width = 800,
                   height = 80,
                   text = "Hi, PillPal User",
@@ -85,6 +100,7 @@ count = 0
 
 #-------------------------------------------------------------NEXT PAGE FUNCTION
 def button():
+    global button1_clicked
     #set flag to true when button is clicked
     button1_clicked = True
     print("button clicked!")
@@ -110,6 +126,7 @@ button1 = ctk.CTkButton(readyframe,
                         hover_color='red',
                         command=next_page)
 button1.place(relx=0.5, rely=0.65, anchor=tkinter.CENTER)
+
 #------------------------------------------------------- STREAKFRAME TO READYFRAME BUTTON (MAY BE DELETED)
 button2 = ctk.CTkButton(streakframe,
                         text="next",
@@ -139,12 +156,7 @@ button3.place(relx=0.5, rely=0.80, anchor=tkinter.CENTER)
 
 window.mainloop()
 
-#DEFINE GLOBAL VARIABLES FOR GUI
-global button1_clicked = False
-global name = ""
-global days = 0
-global streakCount = 0
-global frequencyInt = 0
+
 
 #CHANGES THE LABEL OF THE DAYS LEFT FRAME
 def change_days(index):
@@ -162,9 +174,9 @@ def change_days(index):
   #setting the name to appropriate value 
   name = evening_pills[index].Ename
 
-   
 
 try:
+        print("testing")
         '''
         #START WITH THE STREAK SCREEN
         count = 0
@@ -203,7 +215,7 @@ try:
         count = 0
         show_page(count)
         '''
-  
+        '''
         #TESTING THE NAVIGATION BETWEEN FRAMES WITHOUT BUTTONS
         #START WITH THE STREAK SCREEN
         count = 0
@@ -225,7 +237,7 @@ try:
         #GO BACK TO STREAK SCREEN
         count = 0
         show_page(count)
-        
+        '''
             
 finally:
     GPIO.cleanup()
