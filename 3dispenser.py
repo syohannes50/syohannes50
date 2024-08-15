@@ -1,32 +1,5 @@
 import tkinter
 import customtkinter as ctk
-#----------------------------------------------- CHANGES TO MAIN.PY FOR THE PURPOSE OF THE DISPLAY ---------------------------#
-
-class Evening:
-    def __init__(self, Ename: str, Econtainer: str, Edosage: int, Equantity: int, Edescription: str, Efrequency: str):
-        self.Ename = Ename
-        self.Econtainer = Econtainer
-        self.Edosage = Edosage
-        self.Equantity = Equantity
-        self.Echannel = None
-        self.Edescription = Edescription
-        self.Efrequency
-
-def process_med_info(name, current_color, description, dosage, quantity, frequency, evening_pills): 
-    if frequency.lower() == "daily" or frequency.lower() == "everyday" or frequency.lower() == "once":
-        if description.lower() == "with food":
-            # Instantiate new Evening medicine
-            pill = Evening(Ename=name, Econtainer=current_color, Edescription=description, Edosage=dosage, Equantity=quantity, Efrequency = frequency)
-            evening_pills.append(epill)
-            print("New Evening Pill Added:")
-            print(f"Name: {pill.Ename}, Container: {pill.Econtainer}, Description: {pill.Edescription}, Dosage: {pill.Edosage}, Quantity: {pill.Equantity}, Frequency: {pill.Efrequency}")
-    else:
-        # Instantiate new Evening medicine
-        pill = Evening(Ename=name, Econtainer=current_color, Edescription=description, Edosage=dosage, Equantity=quantity, Efrequency = frequency)
-            evening_pills.append(epill)
-            print("New Evening Pill Added:")
-            print(f"Name: {pill.Ename}, Container: {pill.Econtainer}, Description: {pill.Edescription}, Dosage: {pill.Edosage}, Quantity: {pill.Equantity}, Frequency: {pill.Efrequency}")
-#--------------------------------------------------WILL BE REPLACED BY LAURENS CODE
 
 #theme & color
 ctk.set_appearance_mode("light")
@@ -42,12 +15,12 @@ streakframe = ctk.CTkFrame (window,
                            width = 800,
                            height = 480)
 
-streak = ctk.CTkLabel(streakframe,
-                      width = 800,
-                      height = 500,
-                      text = "You're on a \n {streakCount} day streak!",
-                      font = ('Sans-Serif', 40, 'bold')),
-                      fg_color = '#ffb9d5'
+streak = ctk.CTkLabel(self,
+                      text = "You're on a \n [] day streak!",
+                      font = ('Sans-Serif', 40, 'bold'),
+                      fg_color = '#ffb9d5')
+streak.pack()
+
 streak.place(relx=0.35, rely=0.5, anchor=tkinter.CENTER)
 
 streakframe.pack(padx=5, pady=5)
@@ -165,23 +138,23 @@ button3.place(relx=0.5, rely=0.80, anchor=tkinter.CENTER)
 
 window.mainloop()
 
-#DEFINE GLOBAL VARIABLES
+#DEFINE GLOBAL VARIABLES FOR GUI
 global button1_clicked = False
-global name 
-global days
+global name = ""
+global days = 0
 global streakCount = 0
-global frequencyInt
+global frequencyInt = 0
 
 #CHANGES THE LABEL OF THE DAYS LEFT FRAME
 def change_days(index):
   global days, frequencyInt
   #NEEDS TO ACCESS THE PILL OBJECTS FREQUENCY AND CHANGE IT TO AN INTEGER
-  if evening_pills.Efrequency == "twice":
+  if evening_pills[index].Efrequency == "twice":
     frequencyInt = 2
   else:
     frequencyInt = 1
     
-  total_pills_taken = evening_pills.Edosage * frequencyInt
+  total_pills_taken = evening_pills[index].Edosage * frequencyInt
   days = evening_pills.Equantity / total_pills_taken
   print("Number of days left: " + days)
   
