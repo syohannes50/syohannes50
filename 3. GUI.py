@@ -1,5 +1,6 @@
 import tkinter
 import customtkinter as ctk
+import time
 
 #theme & color
 ctk.set_appearance_mode("light")
@@ -164,77 +165,67 @@ def change_days(index):
    
 
 try:
-        #!!!-----PUT IN A TIME.SLEEP() SOMEWHERE TO ACT AS A TIMER FOR HOW LONG IT TAKES TO SCAN A PRESCRIPTION------!!!
+        '''
+        #START WITH THE STREAK SCREEN
+        count = 0
+        show_page(count)
+        
+       
+        #SHOW READY SCREEN
+        count = 1
+        show_page(count)
+        
+
+        #IF BUTTON IS CLICKED CALL FUNCTION TO MOVE ON TO DISPENSING (SCREEN)
+        
+        if button_clicked == True:
+                #CHECK AGAIN 
+                if button1_clicked == True:
+                  #GUI STAYS ON DISPENSING SCREEN
+                  count = 2
+                  show_page(count)
+                  #RESET BUTTON
+                  button1_clicked = False
+                  print("Pills are dispensing....")
+                  #DISPLAYS THE DAYS LEFT FRAME (WITH PARAMETERS TO ACCESS DATA)
+                  count = 3
+                  #Remember to update the quantity (evening_pills[index].Equantity -= evening_pills[index].dosage)
+                  change_days(i)
+                  show_page(count)
+                  print("Exit completed. Next pill is dispensing...")
+            print("Next container is dispensing...")
+            time.sleep(3)
+      
+        button1_clicked == False 
+        #INCREMENTING STREAK COUNT BY ONE EACH TIME DISPENSING IS DONE BEFORE DISPLAYING STREAK SCREEN
+        streakCount += 1
+        #SHOW THE STREAK SCREEN AGAIN
         count = 0
         show_page(count)
         '''
-        #FIRST: MQTT CONNECTION & APP TO RASPI INFO TRANSFER
-        client = connect_mqtt()
-        subscribe(client)
-        print("Exit out of subscribe complete") #MAY NEED TO MOVE THIS FOR TESTING PURPOSES
-        client.loop_forever() #MAY NOT NEED TO BE HERE: FIND OTHER PLACE FOR IT
-
-        #SECOND: EXIT OUT OF MQTT LOOP
-        print("Message recieved -- Ready to sound alarm!")
-    
-        #THIRD: SET THE PILL OBJETS TO THE SERVOS & PRINT TO CHECK IF THE PILL OBJECTS ARE THERE BEFORE DISPENSING
-        set_servos()
-        print("Assigned the pill objects to servos!")
-        # Hesitant about this for loop
-        for pill in evening_pills:
-            print(pill)
-        '''
-  
-        count = 1
-        show_page(count)
-        '''
-        #FOURTH: SOUND THE ALARM, TURN ON LED
-        #DISPLAY READYFRAME ON GUI
-        print("Ready to Dispense!")
-        GPIO.output(led_pin, GPIO.HIGH)
-        Buzz.start(20)
-        #INSTEAD OF TIMER DO CONDITIONALS WITH THE GUI FRAMES AND BUTTON (EX: IF BUTTON IS CLICKED CALL FUNCTION TO MOVE ON TO DISPENSING)
-        time.sleep(5)
-
-        
-        #FIFTH: TURN OFF LED AND BUZZER, DISPENSE THE PILLS!!!
-        print("Alarm has sounded -- Time to dispense!")
-        GPIO.output(led_pin, GPIO.LOW)
-        Buzz.stop()
-        # if button1_clicked == True:
-        for i in range(len(evening_pills)):
-            print(evening_pills[i].Econtainer + " dispensing")
-            for j in range(evening_pills[i].Edosage):
-                if button1_clicked == True:
-                  count = 2
-                  #GUI SWITCHES TO DISPENSING SCREEN
-                  show_page(count)
-                  button1_clicked = False
-                print(str(evening_pills[i].Edosage) + " pills dispensing")
-                print("calling pillOut")
-                pillOut(i)
-                count = 3
-                #DISPLAYS THE DAYS LEFT FRAME (WITH PARAMETERS TO ACCESS DATA)
-                change_days(i)
-                show_page(count)
-                print("Exit completed. Next pill is dispensing...")
-            print("Next container is dispensing...")
-            time.sleep(1)
-        '''
-        # button1_clicked == False (to reset)
-        #INCREMENTING STREAKCOUNT BY ONE EACH TIME DISPENSING IS DONE || INCREMENT BEFORE DISPLAYING IT !!!!!
-        streakCount += 1
-        #show the streakframe
   
         #TESTING THE NAVIGATION BETWEEN FRAMES WITHOUT BUTTONS
+        #START WITH THE STREAK SCREEN
+        count = 0
+        show_page(count)
+        time.sleep(3)
+        #SHOW READY SCREEN
+        count = 1
+        show_page(count)
+        time.sleep(3)
+        #SHOW DISPENSING SCREEN
         count = 2
         show_page(count)
+        time.sleep(3)
+        #SHOW ALERT SCREEN
         count = 3
         show_page(count)
         print("Finished Dispensing!") 
+        time.sleep(3)
+        #GO BACK TO STREAK SCREEN
         count = 0
         show_page(count)
-        #SWITCH BACK TO STREAK SCREEN
+        
             
 finally:
     GPIO.cleanup()
